@@ -11,7 +11,7 @@
     "text animation",
     "randomizer"
   ],
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "module": "dist/use-scramble.esm.js",
   "main": "dist/index.js",
