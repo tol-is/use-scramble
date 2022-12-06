@@ -11,7 +11,6 @@ function getRandomChar() {
 
 export type UseScrambleProps = {
   text: string;
-  key?: number;
   speed?: number;
   seed?: number;
   step?: number;
@@ -25,7 +24,6 @@ export const useScramble = (props: UseScrambleProps) => {
   //
   const {
     text = '',
-    key = 0,
     speed = 0.5,
     seed = 0,
     step = Math.ceil(text.length / 10),
@@ -71,7 +69,6 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < seed; i++) {
       const index = getRandomInt(idxRef.current, text.length - 1);
       if (typeof controlRef.current[index] !== 'number') {
-        // console.log(index);
         controlRef.current[index] = getRandomScramble();
       }
     }
@@ -195,7 +192,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const replay = () => {
+  const play = () => {
     cancelAnimationFrame(rafRef.current);
     reset();
     rafRef.current = requestAnimationFrame(animate);
@@ -205,7 +202,7 @@ export const useScramble = (props: UseScrambleProps) => {
   useEffect(() => {
     nodeRef.current.ariaLabel = text;
     reset();
-  }, [text, key]);
+  }, [text]);
 
   //
   useEffect(() => {
@@ -218,5 +215,5 @@ export const useScramble = (props: UseScrambleProps) => {
     };
   }, [animate, speed]);
 
-  return { ref: nodeRef, replay };
+  return { ref: nodeRef, play };
 };
