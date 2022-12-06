@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import * as React from 'react';
 
 function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min);
@@ -28,13 +28,12 @@ export const useScramble = (props: UseScrambleProps) => {
     seed = 0,
     step = 1,
     interval = 1,
-    scramble = 0,
+    scramble = 8,
     loop = false,
     onComplete,
   } = props;
 
   // text node ref
-  const textRef = useRef<any>(null);
 
   // animation frame request
   const rafRef = useRef<number>(0);
@@ -79,8 +78,13 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
+  const removeSurplus = () => {
+    controlRef.current.splice(text.length, step);
+  };
+
   // draw when fpsInterval time has passed. fpsInterval is computed by the `speed` prop
   const animate = (time: number) => {
+    console.log('animate');
     const timeElapsed = time - elapsedRef.current;
 
     rafRef.current = requestAnimationFrame(animate);
@@ -98,23 +102,39 @@ export const useScramble = (props: UseScrambleProps) => {
     if (stepRef.current % interval === 0) {
       moveCharIndex();
       seedRandomCharacters();
+      removeSurplus();
     }
 
     let newString = '';
     let charsDone = 0;
 
-    for (var i = 0; i < text.length; i++) {
+    for (var i = 0; i < controlRef.current.length; i++) {
       const currChar = controlRef.current[i];
 
       switch (true) {
-        case text[i] === ' ':
-          newString += ' ';
-          charsDone++;
+        case i >= text.length && typeof currChar === 'string':
+          newString += currChar;
           break;
-        case currChar <= 0:
+        case i >= text.length:
+          newString += getRandomChar();
+          controlRef.current[i] = (controlRef.current[i] as number) - 1;
+          break;
+
+        case typeof currChar === 'string' && i > idxRef.current:
+          newString += currChar;
+          break;
+
+        case typeof currChar === 'string' && i <= idxRef.current:
           newString += text[i];
           charsDone++;
           break;
+
+        case currChar === 0 || text[i] === ' ':
+          newString += text[i];
+          controlRef.current[i] = text[i];
+          charsDone++;
+          break;
+
         case currChar > 0 && i <= idxRef.current:
           newString += getRandomChar();
           controlRef.current[i] = (controlRef.current[i] as number) - 1;
@@ -129,6 +149,8 @@ export const useScramble = (props: UseScrambleProps) => {
 
     textRef.current.innerHTML = newString;
 
+    // console.log(controlRef.current);
+    // console.log("draw", charsDone, text.length);
     if (charsDone === text.length) {
       if (onComplete) {
         onComplete();
@@ -137,7 +159,7 @@ export const useScramble = (props: UseScrambleProps) => {
         stepRef.current = 0;
         idxRef.current = 0;
         elapsedRef.current = 0;
-        controlRef.current = new Array(text.length);
+        // controlRef.current = new Array(text.length);
       } else {
         cancelAnimationFrame(rafRef.current);
       }
@@ -148,10 +170,19 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // reset step when text is changed
   useEffect(() => {
+    console.log(text);
     stepRef.current = 0;
     idxRef.current = 0;
-    elapsedRef.current = 0;
-    controlRef.current = new Array(text.length);
+    const newArray = new Array(text.length);
+    const prevString = controlRef.current.join('');
+
+    for (let i = 0; i < prevString.length; i++) {
+      if (typeof prevString[i] === 'string') {
+        newArray[i] = prevString[i];
+      }
+    }
+
+    controlRef.current = newArray;
   }, [text]);
 
   //
