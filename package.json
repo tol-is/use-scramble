@@ -27,7 +27,8 @@
     "node": ">=10"
   },
   "scripts": {
-    "develop": "parcel playground/index.html",
+    "dev": "concurrently \"yarn start\" \"yarn playground\"",
+    "playground": "parcel playground/index.html",
     "start": "tsdx watch",
     "build": "tsdx build",
     "test": "tsdx test --passWithNoTests",
@@ -78,5 +79,8 @@
   "peerDependencies": {
     "react": ">=16",
     "react-dom": ">=16"
+  },
+  "dependencies": {
+    "concurrently": "^7.6.0"
   }
 }
