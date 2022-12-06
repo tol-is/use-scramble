@@ -57,7 +57,7 @@ export const useScramble = (props: UseScrambleProps) => {
   const getRandomScramble = () => {
     const diceRoll = getRandomInt(0, 10);
     return scramble > 0
-      ? scramble + 1 + (diceRoll < 2 ? getRandomInt(0, scramble) : 1)
+      ? scramble + (diceRoll < 2 ? getRandomInt(0, scramble) : 0)
       : 0;
   };
 
