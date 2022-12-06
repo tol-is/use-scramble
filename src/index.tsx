@@ -129,14 +129,14 @@ export const useScramble = (props: UseScrambleProps) => {
     let charsDone = 0;
 
     for (var i = 0; i < controlRef.current.length; i++) {
-      const currChar = controlRef.current[i];
+      const idxControl = controlRef.current[i];
 
-      if (typeof currChar === 'undefined') {
+      if (typeof idxControl === 'undefined') {
         newString += '';
       } else {
         switch (true) {
-          case i >= text.length && typeof currChar === 'string':
-            newString += currChar;
+          case i >= text.length && typeof idxControl === 'string':
+            newString += idxControl;
             break;
 
           case i >= text.length:
@@ -144,27 +144,27 @@ export const useScramble = (props: UseScrambleProps) => {
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
             break;
 
-          case typeof currChar === 'string' && i > idxRef.current:
-            newString += currChar;
+          case typeof idxControl === 'string' && i > idxRef.current:
+            newString += idxControl;
             break;
 
-          case typeof currChar === 'string' && i <= idxRef.current:
+          case typeof idxControl === 'string' && i <= idxRef.current:
             newString += text[i];
             charsDone++;
             break;
 
-          case currChar === 0 || text[i] === ' ':
+          case idxControl === 0 || text[i] === ' ':
             newString += text[i];
             controlRef.current[i] = text[i];
             charsDone++;
             break;
 
-          case currChar > 0 && i <= idxRef.current:
+          case idxControl > 0 && i <= idxRef.current:
             newString += getRandomChar();
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
             break;
 
-          case currChar > 0:
+          case idxControl > 0:
             newString += getRandomChar();
             break;
 
