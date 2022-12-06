@@ -40,7 +40,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // compute
   const elapsedRef = useRef(0);
-  const fpsInterval = 1000 / (120 * speed);
+  const fpsInterval = 1000 / (60 * speed);
 
   // scramble step
   const stepRef = useRef<number>(0);
