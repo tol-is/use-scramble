@@ -9,7 +9,7 @@ function getRandomChar() {
   return String.fromCharCode(rand + 65);
 }
 
-type useScrambleProps = {
+export type UseScrambleProps = {
   text: string;
   speed?: number;
   seed?: number;
@@ -20,7 +20,7 @@ type useScrambleProps = {
   onComplete?: Function;
 };
 
-export const useScramble = (props: useScrambleProps) => {
+export const useScramble = (props: UseScrambleProps) => {
   //
   const {
     text,
