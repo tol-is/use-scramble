@@ -11,6 +11,7 @@ function getRandomChar() {
 
 export type UseScrambleProps = {
   text: string;
+  key?: number;
   speed?: number;
   seed?: number;
   step?: number;
@@ -24,6 +25,7 @@ export const useScramble = (props: UseScrambleProps) => {
   //
   const {
     text = '',
+    key = 0,
     speed = 0.5,
     seed = 0,
     step = Math.ceil(text.length / 10),
@@ -203,7 +205,7 @@ export const useScramble = (props: UseScrambleProps) => {
   useEffect(() => {
     nodeRef.current.ariaLabel = text;
     reset();
-  }, [text]);
+  }, [text, key]);
 
   //
   useEffect(() => {
