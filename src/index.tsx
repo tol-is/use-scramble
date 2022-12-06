@@ -55,30 +55,27 @@ export const useScramble = (props: useScrambleProps) => {
   // dice role with 20%
   const getRandomScramble = () => {
     const diceRoll = getRandomInt(0, 10);
-    return scramble + (diceRoll < 2 ? getRandomInt(0, scramble) : 0);
+    return scramble > 0
+      ? scramble + 1 + (diceRoll < 2 ? getRandomInt(0, scramble) : 1)
+      : 0;
   };
 
   // pick random character ahead in the string, and add them to the randomizer
   const seedRandomCharacters = () => {
     for (var i = 0; i < seed; i++) {
       const pos = getRandomInt(idxRef.current, text.length);
-      scrambleRef.current[pos] =
-        scrambleRef.current[pos] || getRandomScramble();
+      controlRef.current[pos] = getRandomScramble();
     }
   };
 
   // add `step` characters to the randomizer, and increase the idxRef pointer
   const moveCharIndex = () => {
-    if (idxRef.current >= text.length) {
-      idxRef.current = text.length;
-      return;
-    }
-
     for (var i = 0; i < step; i++) {
-      const currentIndex = idxRef.current;
-      scrambleRef.current[currentIndex] =
-        scrambleRef.current[currentIndex] || getRandomScramble();
-      idxRef.current += 1;
+      if (idxRef.current < controlRef.current.length) {
+        const currentIndex = idxRef.current;
+        controlRef.current[currentIndex] = getRandomScramble();
+        idxRef.current += 1;
+      }
     }
   };
 
@@ -98,14 +95,9 @@ export const useScramble = (props: useScrambleProps) => {
   const draw = () => {
     if (!textRef.current) return;
 
-    // add random seeds on every interval
-    if (stepRef.current % (interval + (2 - seed)) === 0) {
-      seedRandomCharacters();
-    }
-
-    //
     if (stepRef.current % interval === 0) {
       moveCharIndex();
+      seedRandomCharacters();
     }
 
     let newString = '';
