@@ -17,10 +17,11 @@ export const App = () => {
   const values = useControls({
     Randomize: button(() => setSample(generateWords())),
     speed: { value: 0.5, min: 0.1, max: 1, step: 0.1 },
-    scramble: { value: 4, min: 0, max: 42, step: 1 },
+    scramble: { value: 1, min: 0, max: 42, step: 1 },
     step: { value: 4, min: 1, max: 10, step: 1 },
     interval: { value: 1, min: 1, max: 20, step: 1 },
-    seed: { value: 0, min: 0, max: 42, step: 1 },
+    seed: { value: 1, min: 0, max: 42, step: 1 },
+    overwrite: false,
   });
 
   const { ref, repeat } = useScramble({

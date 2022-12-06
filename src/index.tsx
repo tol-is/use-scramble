@@ -16,7 +16,7 @@ export type UseScrambleProps = {
   step?: number;
   interval?: number;
   scramble?: number;
-  loop?: boolean;
+  overwrite?: boolean;
   onComplete?: Function;
 };
 
@@ -29,11 +29,12 @@ export const useScramble = (props: UseScrambleProps) => {
     step = 1,
     interval = 1,
     scramble = 8,
+    overwrite = true,
     onComplete,
   } = props;
 
   // text node ref
-  const textRef = useRef<any>(null);
+  const nodeRef = useRef<any>(null);
 
   // animation frame request
   const rafRef = useRef<number>(0);
@@ -65,12 +66,14 @@ export const useScramble = (props: UseScrambleProps) => {
   const seedRandomCharacters = () => {
     for (var i = 0; i < seed; i++) {
       const pos = getRandomInt(idxRef.current, text.length - 1);
-      controlRef.current[pos] = getRandomScramble();
+      if (typeof controlRef.current[pos] !== 'number') {
+        controlRef.current[pos] = getRandomScramble();
+      }
     }
   };
 
   // add `step` characters to the randomizer, and increase the idxRef pointer
-  const moveCharIndex = () => {
+  const moveControlIndex = () => {
     for (var i = 0; i < step; i++) {
       if (idxRef.current < controlRef.current.length) {
         const currentIndex = idxRef.current;
@@ -80,7 +83,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const addMissingCharacters = () => {
+  const addNewSlots = () => {
     if (text.length > controlRef.current.length) {
       for (var i = 0; i < step; i++) {
         if (controlRef.current.length + 1 < text.length) {
@@ -90,7 +93,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const removeSurplus = () => {
+  const removeExtraSlots = () => {
     if (text.length < controlRef.current.length) {
       controlRef.current.splice(text.length, step);
     }
@@ -98,7 +101,6 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // draw when fpsInterval time has passed. fpsInterval is computed by the `speed` prop
   const animate = (time: number) => {
-    console.log('animate');
     const timeElapsed = time - elapsedRef.current;
 
     rafRef.current = requestAnimationFrame(animate);
@@ -111,12 +113,12 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // redraw text on every step and increment stepRef
   const draw = () => {
-    if (!textRef.current) return;
+    if (!nodeRef.current) return;
 
     if (stepRef.current % interval === 0) {
-      addMissingCharacters();
-      removeSurplus();
-      moveCharIndex();
+      addNewSlots();
+      removeExtraSlots();
+      moveControlIndex();
       seedRandomCharacters();
     }
 
@@ -127,12 +129,13 @@ export const useScramble = (props: UseScrambleProps) => {
       const currChar = controlRef.current[i];
 
       if (typeof currChar === 'undefined') {
-        newString += '<span>&nbsp;</span>';
+        newString += '';
       } else {
         switch (true) {
           case i >= text.length && typeof currChar === 'string':
             newString += currChar;
             break;
+
           case i >= text.length:
             newString += getRandomChar();
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
@@ -157,15 +160,17 @@ export const useScramble = (props: UseScrambleProps) => {
             newString += getRandomChar();
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
             break;
+
           case currChar > 0:
             newString += getRandomChar();
             break;
+
           default:
-            newString += '<span>&nbsp;</span>';
+            newString += '';
         }
       }
     }
-    textRef.current.innerHTML = newString;
+    nodeRef.current.innerHTML = newString;
 
     if (charsDone === text.length) {
       if (onComplete) {
@@ -177,18 +182,25 @@ export const useScramble = (props: UseScrambleProps) => {
     stepRef.current += 1;
   };
 
-  const repeat = () => {
-    cancelAnimationFrame(rafRef.current);
+  const reset = () => {
     stepRef.current = 0;
     idxRef.current = 0;
+    if (overwrite) {
+      controlRef.current = new Array(text.length);
+    }
+  };
+
+  const repeat = () => {
+    cancelAnimationFrame(rafRef.current);
+    reset();
     rafRef.current = requestAnimationFrame(animate);
   };
 
   // reset step when text is changed
   useEffect(() => {
-    stepRef.current = 0;
-    idxRef.current = 0;
-  }, [text]);
+    nodeRef.current.ariaLabel = text;
+    reset();
+  }, [text, reset]);
 
   //
   useEffect(() => {
@@ -201,5 +213,5 @@ export const useScramble = (props: UseScrambleProps) => {
     };
   }, [repeat, animate, speed]); // Make sure the effect runs only once
 
-  return { ref: textRef, repeat };
+  return { ref: nodeRef, repeat };
 };
