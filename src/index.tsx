@@ -23,10 +23,10 @@ export type UseScrambleProps = {
 export const useScramble = (props: UseScrambleProps) => {
   //
   const {
-    text,
+    text = '',
     speed = 0.5,
     seed = 0,
-    step = 1,
+    step = Math.ceil(text.length / 10),
     interval = 1,
     scramble = 4,
     overwrite = true,
