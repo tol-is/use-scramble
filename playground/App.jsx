@@ -24,14 +24,14 @@ export const App = () => {
     overwrite: false,
   });
 
-  const { ref, repeat } = useScramble({
+  const { ref, replay } = useScramble({
     text: sample,
     ...values,
   });
 
   return (
     <>
-      <button onClick={repeat}>repeat</button>
+      <button onClick={replay}>replay</button>
       <p ref={ref} />
     </>
   );

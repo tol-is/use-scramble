@@ -28,7 +28,7 @@ export const useScramble = (props: UseScrambleProps) => {
     seed = 0,
     step = 1,
     interval = 1,
-    scramble = 8,
+    scramble = 4,
     overwrite = true,
     onComplete,
   } = props;
@@ -41,7 +41,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // compute
   const elapsedRef = useRef(0);
-  const fpsInterval = 1000 / (60 * speed);
+  const fpsInterval = 1000 / (30 * speed);
 
   // scramble step
   const stepRef = useRef<number>(0);
@@ -64,10 +64,13 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // pick random character ahead in the string, and add them to the randomizer
   const seedRandomCharacters = () => {
+    if (idxRef.current === text.length) return;
+
     for (var i = 0; i < seed; i++) {
-      const pos = getRandomInt(idxRef.current, text.length - 1);
-      if (typeof controlRef.current[pos] !== 'number') {
-        controlRef.current[pos] = getRandomScramble();
+      const index = getRandomInt(idxRef.current, text.length - 1);
+      if (typeof controlRef.current[index] !== 'number') {
+        // console.log(index);
+        controlRef.current[index] = getRandomScramble();
       }
     }
   };
@@ -83,7 +86,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const addNewSlots = () => {
+  const increaseControl = () => {
     if (text.length > controlRef.current.length) {
       for (var i = 0; i < step; i++) {
         if (controlRef.current.length + 1 < text.length) {
@@ -93,7 +96,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const removeExtraSlots = () => {
+  const decreaseControl = () => {
     if (text.length < controlRef.current.length) {
       controlRef.current.splice(text.length, step);
     }
@@ -116,8 +119,8 @@ export const useScramble = (props: UseScrambleProps) => {
     if (!nodeRef.current) return;
 
     if (stepRef.current % interval === 0) {
-      addNewSlots();
-      removeExtraSlots();
+      increaseControl();
+      decreaseControl();
       moveControlIndex();
       seedRandomCharacters();
     }
@@ -190,7 +193,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const repeat = () => {
+  const replay = () => {
     cancelAnimationFrame(rafRef.current);
     reset();
     rafRef.current = requestAnimationFrame(animate);
@@ -200,7 +203,7 @@ export const useScramble = (props: UseScrambleProps) => {
   useEffect(() => {
     nodeRef.current.ariaLabel = text;
     reset();
-  }, [text, reset]);
+  }, [text]);
 
   //
   useEffect(() => {
@@ -211,7 +214,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [repeat, animate, speed]); // Make sure the effect runs only once
+  }, [replay, animate, speed]);
 
-  return { ref: nodeRef, repeat };
+  return { ref: nodeRef, replay };
 };
