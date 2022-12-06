@@ -50,7 +50,7 @@ export const useScramble = (props: UseScrambleProps) => {
   const idxRef = useRef<number>(0);
 
   // scramble controller
-  const scrambleRef = useRef<number[]>([]);
+  const controlRef = useRef<Array<string | number>>([]);
 
   // dice role with 20%
   const getRandomScramble = () => {
@@ -104,22 +104,22 @@ export const useScramble = (props: UseScrambleProps) => {
     let charsDone = 0;
 
     for (var i = 0; i < text.length; i++) {
-      const cPos = scrambleRef.current[i];
+      const currChar = controlRef.current[i];
 
       switch (true) {
         case text[i] === ' ':
           newString += ' ';
           charsDone++;
           break;
-        case cPos <= 0:
+        case currChar <= 0:
           newString += text[i];
           charsDone++;
           break;
-        case cPos > 0 && i <= idxRef.current:
+        case currChar > 0 && i <= idxRef.current:
           newString += getRandomChar();
-          scrambleRef.current[i] -= 1;
+          controlRef.current[i] = (controlRef.current[i] as number) - 1;
           break;
-        case cPos > 0:
+        case currChar > 0:
           newString += getRandomChar();
           break;
         default:
@@ -137,7 +137,7 @@ export const useScramble = (props: UseScrambleProps) => {
         stepRef.current = 0;
         idxRef.current = 0;
         elapsedRef.current = 0;
-        scrambleRef.current = new Array(text.length);
+        controlRef.current = new Array(text.length);
       } else {
         cancelAnimationFrame(rafRef.current);
       }
@@ -151,7 +151,7 @@ export const useScramble = (props: UseScrambleProps) => {
     stepRef.current = 0;
     idxRef.current = 0;
     elapsedRef.current = 0;
-    scrambleRef.current = new Array(text.length);
+    controlRef.current = new Array(text.length);
   }, [text]);
 
   //
