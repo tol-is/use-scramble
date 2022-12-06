@@ -64,6 +64,7 @@
     "@size-limit/preset-small-lib": "^4.8.0",
     "@types/react": "^18.0.26",
     "@types/react-dom": "^18.0.9",
+    "concurrently": "^7.6.0",
     "husky": "^8.0.2",
     "iphigenia-in-aulis": "^1.0.0",
     "leva": "^0.9.34",
@@ -79,8 +80,5 @@
   "peerDependencies": {
     "react": ">=16",
     "react-dom": ">=16"
-  },
-  "dependencies": {
-    "concurrently": "^7.6.0"
   }
 }

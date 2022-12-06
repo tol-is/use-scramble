@@ -13,10 +13,10 @@ const generateWords = (index) => tragedy[index || getRandomInt(0,tragedy.length)
 
 export const App = () => {
 
-  const [sample, setSample] = React.useState(generateWords(13))
+  const [sample, setSample] = React.useState(generateWords())
   const values = useControls(
     {
-      'Randomize': button(() =>setSample(generateWords(4))),
+      'Randomize': button(() =>setSample(generateWords())),
       speed: { value: 0.4, min: 0.1, max: 1, step: 0.1 },
       scramble: { value: 5, min: 0, max: 42, step: 1 },
       step: { value: 2, min: 1, max: 10, step: 1 },
