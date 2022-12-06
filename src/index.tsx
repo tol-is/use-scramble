@@ -177,6 +177,13 @@ export const useScramble = (props: UseScrambleProps) => {
     stepRef.current += 1;
   };
 
+  const repeat = () => {
+    cancelAnimationFrame(rafRef.current);
+    stepRef.current = 0;
+    idxRef.current = 0;
+    rafRef.current = requestAnimationFrame(animate);
+  };
+
   // reset step when text is changed
   useEffect(() => {
     stepRef.current = 0;
@@ -192,7 +199,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [animate, speed]); // Make sure the effect runs only once
+  }, [repeat, animate, speed]); // Make sure the effect runs only once
 
-  return { ref: textRef };
+  return { ref: textRef, repeat };
 };
