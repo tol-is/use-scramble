@@ -148,7 +148,6 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // reset step when text is changed
   useEffect(() => {
-    // clearTimeout(loopRef.current)
     stepRef.current = 0;
     idxRef.current = 0;
     elapsedRef.current = 0;
@@ -157,10 +156,9 @@ export const useScramble = (props: UseScrambleProps) => {
 
   //
   useEffect(() => {
+    cancelAnimationFrame(rafRef.current);
     if (speed > 0.001) {
       rafRef.current = requestAnimationFrame(animate);
-    } else {
-      cancelAnimationFrame(rafRef.current);
     }
     return () => {
       cancelAnimationFrame(rafRef.current);
