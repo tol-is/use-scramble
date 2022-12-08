@@ -26,40 +26,65 @@ export type UseScrambleProps = {
    */
   text: string;
   /**
-   * A speed of 1, will redraw every 16ms, or 60 times a second
+   * 0-1 range that determines the scramble speed. A speed of 1 will redraw 60 times a second. A speed of 0 will pause the animation
+   *
+   * @default 1
    */
   speed?: number;
   /**
-   * Over how many frames tick the animation?
+   * The controller will move forward along the text input and scramble more characters, at a pace of `tick` frames. Combined with the `speed` prop, you can control the animation rate
+   *
+   * @default 1
    */
   tick?: number;
-
   /**
    * Step forward on every tick
+   *
+   * @default 1
    */
   step?: number;
-
   /**
    * Randomize `seed` characters at random text positions
+   *
+   * @default 1
    */
   seed?: number;
   /**
    * How many times to scramble each character?
+   *
+   * @default 1
    */
   scramble?: number;
+
   /**
-   * Start text animation from an empty string
+   * Unicode character range for scrambler.
+   *
+   * If a tupple is provided [60,125], it will randomly choose a unicode character code within that range.
+   *
+   * If the array contains more than two unicode values, it will choose randomly from the array values only.
+   *
+   * To randomize with only two values, you can repeat them in the array [91,93,91,93]
+   *
+   * @default [65,125]
    */
-  overwrite?: boolean;
+  range?: RangeOrCharCodes;
+  /**
+   * Set the animation to overdrive mode, and set the unicode character code to use in the animation
+   */
+  overdrive?: false | number;
+  /**
+   * Always start text animation from an empty string
+   *
+   * @default false
+   */
+  overflow?: boolean;
   /**
    * onComplete callback
    */
   onComplete?: Function;
-  range?: RangeOrCharCodes;
 };
 
 export const useScramble = (props: UseScrambleProps) => {
-  //
   let {
     text = '',
     speed = 1,
@@ -67,8 +92,9 @@ export const useScramble = (props: UseScrambleProps) => {
     step = 1,
     tick = 1,
     scramble = 1,
-    overwrite = true,
+    overflow = true,
     range = [65, 125],
+    overdrive = 95,
     onComplete,
   } = props;
 
@@ -103,20 +129,15 @@ export const useScramble = (props: UseScrambleProps) => {
   const scrambleIndexRef = useRef<number>(0);
 
   // scramble controller
-  const controlRef = useRef<Array<string | number | undefined>>(
+  const controlRef = useRef<Array<string | number | null>>(
     new Array(text.length)
   );
 
-  // dice role with 20%
-  const getRandomScramble = () => {
-    const diceRoll = getRandomInt(0, 10);
-    return scramble > 0
-      ? scramble + (diceRoll < 2 ? getRandomInt(0, scramble) : 0)
-      : 0;
-  };
+  // overdrive control index
+  const overdriveRef = useRef<number>(0);
 
   // pick random character ahead in the string, and add them to the randomizer
-  const seedRandomCharacters = () => {
+  const seedForward = () => {
     if (scrambleIndexRef.current === text.length) return;
 
     for (var i = 0; i < seed; i++) {
@@ -126,19 +147,19 @@ export const useScramble = (props: UseScrambleProps) => {
       );
       if (typeof controlRef.current[index] !== 'number') {
         controlRef.current[index] =
-          controlRef.current[index] === ' ' ? ' ' : getRandomScramble();
+          controlRef.current[index] === ' ' ? ' ' : scramble;
       }
     }
   };
 
   // add `step` characters to the randomizer, and increase the scrambleIndexRef pointer
-  const moveControlIndex = () => {
+  const stepForward = () => {
     for (var i = 0; i < step; i++) {
       if (scrambleIndexRef.current < text.length) {
         const currentIndex = scrambleIndexRef.current;
 
         controlRef.current[currentIndex] =
-          text[scrambleIndexRef.current] === ' ' ? ' ' : getRandomScramble();
+          text[scrambleIndexRef.current] === ' ' ? ' ' : scramble;
         scrambleIndexRef.current += 1;
       }
     }
@@ -148,7 +169,7 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < step; i++) {
       if (controlRef.current.length + 1 <= text.length) {
         controlRef.current.push(
-          text[controlRef.current.length + 1] === ' ' ? ' ' : undefined
+          text[controlRef.current.length + 1] === ' ' ? ' ' : null
         );
       }
     }
@@ -160,11 +181,25 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
+  const handleOverdrive = () => {
+    if (!overdrive) return;
+
+    for (var i = 0; i < step; i++) {
+      if (overdriveRef.current < controlRef.current.length + 1) {
+        controlRef.current[overdriveRef.current] =
+          text[overdriveRef.current] === ' '
+            ? ' '
+            : String.fromCharCode(overdrive);
+        overdriveRef.current += 1;
+      }
+    }
+  };
+
   const handleTick = () => {
     increaseControl();
     decreaseControl();
-    moveControlIndex();
-    seedRandomCharacters();
+    stepForward();
+    seedForward();
   };
 
   /**
@@ -180,6 +215,10 @@ export const useScramble = (props: UseScrambleProps) => {
     const timeElapsed = time - elapsedRef.current;
 
     rafRef.current = requestAnimationFrame(animate);
+
+    if (overdrive) {
+      handleOverdrive();
+    }
 
     if (timeElapsed > fpsInterval) {
       elapsedRef.current = time;
@@ -203,6 +242,7 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < controlRef.current.length; i++) {
       const controlValue = controlRef.current[i];
 
+      console.log(controlRef.current);
       switch (true) {
         /**
          * a positive integer value, get a random character
@@ -244,12 +284,10 @@ export const useScramble = (props: UseScrambleProps) => {
       }
     }
 
-    // apply
     nodeRef.current.innerHTML = result;
 
     /**
-     * Condition to exit:
-     * Result is equal to text input
+     * Exit if the result is equal to the input
      *
      * - Trim control to text length
      * - fire onComplete
@@ -268,12 +306,13 @@ export const useScramble = (props: UseScrambleProps) => {
   /**
    * Reset scramble controls
    *
-   * if overwrite is true, reset the control to the an empty array, the size of the text input. This will cause the animation to play from an empty string
+   * if overflow is true, overflow the control to the an empty array, the size of the text input. This will cause the animation to play from an empty string
    */
   const reset = () => {
     stepRef.current = 0;
     scrambleIndexRef.current = 0;
-    if (overwrite) {
+    overdriveRef.current = 0;
+    if (!overflow) {
       controlRef.current = new Array(text.length);
     }
   };
@@ -311,7 +350,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [text, speed, animate]);
+  }, [text, speed, overdrive, animate]);
 
   return { ref: nodeRef, play };
 };

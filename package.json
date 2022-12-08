@@ -9,7 +9,8 @@
     "typewriter",
     "random text",
     "text animation",
-    "randomizer"
+    "randomizer",
+    "yugop"
   ],
   "version": "1.0.0",
   "license": "MIT",
@@ -17,8 +18,7 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
-    "dist",
-    "src"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
@@ -68,7 +68,6 @@
     "husky": "^8.0.2",
     "iphigenia-in-aulis": "^1.0.0",
     "leva": "^0.9.34",
-    "lorem-ipsum": "^2.0.8",
     "parcel": "^2.8.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

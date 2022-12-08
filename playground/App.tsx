@@ -21,13 +21,14 @@ export const App = () => {
     step: { value: 8, min: 1, max: 42, step: 1 },
     scramble: { value: 3, min: 0, max: 42, step: 1 },
     seed: { value: 1, min: 0, max: 10, step: 1 },
-    overwrite: false,
+    overflow: true,
+    overdrive: true,
   });
 
   const { ref, play } = useScramble({
     text: sample,
-    range: [48, 57],
     ...params,
+    overdrive: params.overdrive ? 95 : false,
   });
 
   useControls(
