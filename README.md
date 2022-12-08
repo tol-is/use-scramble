@@ -1,6 +1,6 @@
 # useScramble
 
-A lightweight (<1KB), high performance, rect-hook for text animations.
+A lightweight (<1KB), high performance, react-hook for text animations.
 
 The hook receives a set of parameteres that allows you to customize the pace, and style of the animation.
 
@@ -30,7 +30,7 @@ Will start the `playground` minisite and build the library on watch mode
 import { useScramble } from 'use-scramble';
 
 export const App = () => {
-  const ref = useScramble({
+  const { ref } = useScramble({
     text: 'Achilles next, that nimble runner, swift on his feet as the wind',
     speed: 0.6,
     tick: 1,
