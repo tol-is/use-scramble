@@ -16,18 +16,23 @@ export const App = () => {
   const [sample, setSample] = React.useState(generateWords());
 
   const params = useControls({
+    overdrive: true,
     speed: { value: 0.75, min: 0, max: 1, step: 0.01 },
     tick: { value: 1, min: 1, max: 10, step: 1 },
     step: { value: 8, min: 1, max: 42, step: 1 },
     scramble: { value: 3, min: 0, max: 42, step: 1 },
     seed: { value: 1, min: 0, max: 10, step: 1 },
     overflow: true,
-    overdrive: true,
   });
 
   const { ref, play } = useScramble({
     text: sample,
-    ...params,
+    speed: params.speed,
+    tick: params.tick,
+    step: params.step,
+    scramble: params.scramble,
+    seed: params.seed,
+    overflow: params.overflow,
     overdrive: params.overdrive ? 95 : false,
   });
 

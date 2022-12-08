@@ -242,7 +242,6 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < controlRef.current.length; i++) {
       const controlValue = controlRef.current[i];
 
-      console.log(controlRef.current);
       switch (true) {
         /**
          * a positive integer value, get a random character
@@ -336,6 +335,10 @@ export const useScramble = (props: UseScrambleProps) => {
     reset();
   }, [text]);
 
+  useEffect(() => {
+    play();
+  }, [overdrive]);
+
   /**
    * start or stop animation when text and speed change
    */
@@ -350,7 +353,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [text, speed, overdrive, animate]);
+  }, [text, speed, animate]);
 
   return { ref: nodeRef, play };
 };
