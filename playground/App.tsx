@@ -16,21 +16,12 @@ export const App = () => {
   const [sample, setSample] = React.useState(generateWords());
 
   const [values, set] = useControls(() => ({
-    speed: { value: 0.5, min: 0.01, max: 1, step: 0.01 },
-    scramble: { value: 1, min: 0, max: 42, step: 1 },
-    increment: { value: 4, min: 1, max: 42, step: 1 },
-    interval: { value: 1, min: 1, max: 10, step: 1 },
+    speed: { value: 0.75, min: 0, max: 1, step: 0.01 },
+    scramble: { value: 3, min: 0, max: 42, step: 1 },
+    step: { value: 8, min: 1, max: 42, step: 1 },
+    tick: { value: 1, min: 1, max: 10, step: 1 },
     seed: { value: 1, min: 0, max: 10, step: 1 },
     overwrite: false,
-    //   text: {
-    //     value: '',
-    //     onChange: value => {
-    //       console.log('play', value);
-    //       if (value) {
-    //         setSample('POTATO');
-    //       }
-    //     },
-    //   },
   }));
 
   const { ...params } = values;
@@ -44,7 +35,6 @@ export const App = () => {
     {
       play: button(() => play()),
       Randomize: button(() => {
-        // set({ text: '' });
         setSample(generateWords());
       }),
     },

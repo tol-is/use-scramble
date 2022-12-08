@@ -10,13 +10,39 @@ function getRandomChar() {
 }
 
 export type UseScrambleProps = {
+  /**
+   * Text input
+   */
   text: string;
+  /**
+   * A speed of 1, will redraw every 16ms, or 60 times a second
+   */
   speed?: number;
+  /**
+   * Over how many frames tick the animation?
+   */
+  tick?: number;
+
+  /**
+   * Step forward on every tick
+   */
+  step?: number;
+
+  /**
+   * Randomize `seed` characters at random text positions
+   */
   seed?: number;
-  increment?: number;
-  interval?: number;
+  /**
+   * How many times to scramble each character?
+   */
   scramble?: number;
+  /**
+   * Start text animation from an empty string
+   */
   overwrite?: boolean;
+  /**
+   * onComplete callback
+   */
   onComplete?: Function;
 };
 
@@ -26,26 +52,25 @@ export const useScramble = (props: UseScrambleProps) => {
     text = '',
     speed = 0.5,
     seed = 0,
-    increment = Math.ceil(text.length / 10),
-    interval = 1,
+    step = Math.ceil(text.length / 10),
+    tick = 1,
     scramble = 4,
     overwrite = true,
     onComplete,
   } = props;
 
   if (speed === 0) {
-    increment = 1;
     console.error('speed 0 will stop the animation');
   }
 
-  if (increment < 1) {
-    increment = 1;
-    console.error('increment must be at least 1. ');
+  if (step < 1) {
+    step = 1;
+    console.error('step must be at least 1. ');
   }
 
-  if (interval < 1) {
-    interval = 1;
-    console.error('interval must be at least 1');
+  if (tick < 1) {
+    tick = 1;
+    console.error('tick must be at least 1');
   }
 
   // text node ref
@@ -56,13 +81,13 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // compute
   const elapsedRef = useRef(0);
-  const fpsInterval = 1000 / (30 * speed);
+  const fpsInterval = 1000 / (60 * speed);
 
-  // scramble increment
-  const incrementRef = useRef<number>(0);
+  // scramble step
+  const stepRef = useRef<number>(0);
 
   // current character index ref
-  const idxRef = useRef<number>(0);
+  const scrambleIndexRef = useRef<number>(0);
 
   // scramble controller
   const controlRef = useRef<Array<string | number | undefined>>(
@@ -79,153 +104,201 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // pick random character ahead in the string, and add them to the randomizer
   const seedRandomCharacters = () => {
-    if (idxRef.current === text.length) return;
+    if (scrambleIndexRef.current === text.length) return;
 
     for (var i = 0; i < seed; i++) {
-      const index = getRandomInt(idxRef.current, text.length - 1);
+      const index = getRandomInt(
+        scrambleIndexRef.current,
+        controlRef.current.length - 1
+      );
       if (typeof controlRef.current[index] !== 'number') {
-        // controlRef.current[index] = getRandomScramble();
+        controlRef.current[index] =
+          controlRef.current[index] === ' ' ? ' ' : getRandomScramble();
       }
     }
   };
 
-  // add `increment` characters to the randomizer, and increase the idxRef pointer
+  // add `step` characters to the randomizer, and increase the scrambleIndexRef pointer
   const moveControlIndex = () => {
-    for (var i = 0; i < increment; i++) {
-      if (idxRef.current < controlRef.current.length) {
-        const currentIndex = idxRef.current;
-        controlRef.current[currentIndex] = getRandomScramble();
-        idxRef.current += 1;
+    for (var i = 0; i < step; i++) {
+      if (scrambleIndexRef.current < text.length) {
+        const currentIndex = scrambleIndexRef.current;
+
+        controlRef.current[currentIndex] =
+          text[scrambleIndexRef.current] === ' ' ? ' ' : getRandomScramble();
+        scrambleIndexRef.current += 1;
       }
     }
   };
 
   const increaseControl = () => {
-    if (text.length > controlRef.current.length) {
-      for (var i = 0; i < increment; i++) {
-        if (controlRef.current.length + 1 < text.length) {
-          controlRef.current.push(undefined);
-        }
+    for (var i = 0; i < step; i++) {
+      if (controlRef.current.length + 1 <= text.length) {
+        controlRef.current.push(
+          text[controlRef.current.length + 1] === ' ' ? ' ' : undefined
+        );
       }
     }
   };
 
   const decreaseControl = () => {
     if (text.length < controlRef.current.length) {
-      controlRef.current.splice(text.length, increment);
+      controlRef.current.splice(text.length, step);
     }
   };
 
-  // draw when fpsInterval time has passed. fpsInterval is computed by the `speed` prop
+  const handleTick = () => {
+    increaseControl();
+    decreaseControl();
+    moveControlIndex();
+    seedRandomCharacters();
+  };
+
+  /**
+   * Control the animation framerate, from the speed prop
+   *
+   * if speed is 0, stop the animation
+   */
   const animate = (time: number) => {
-    // console.log('animate');
+    if (speed === 0) {
+      return;
+    }
+
     const timeElapsed = time - elapsedRef.current;
 
     rafRef.current = requestAnimationFrame(animate);
 
     if (timeElapsed > fpsInterval) {
       elapsedRef.current = time;
+
+      if (stepRef.current % tick === 0) {
+        handleTick();
+      }
+
       draw();
     }
   };
 
-  // redraw text on every increment and increment incrementRef
+  /**
+   * Redraw text on every animation frame
+   */
   const draw = () => {
     if (!nodeRef.current) return;
 
-    if (incrementRef.current % interval === 0) {
-      increaseControl();
-      decreaseControl();
-      moveControlIndex();
-      seedRandomCharacters();
-    }
-
     let result = '';
 
-    // controlRef.current.forEach(v => {
-    //   if (v === undefined) {
-    //     console.log('boom');
-    //     debugger;
-    //   }
-    // });
-    // console.log(controlRef.current);
-
     for (var i = 0; i < controlRef.current.length; i++) {
-      const idxControl = controlRef.current[i];
+      const controlValue = controlRef.current[i];
 
-      if (typeof idxControl === 'undefined') {
-        result += '';
-      } else {
-        switch (true) {
-          case typeof idxControl === 'string' && i >= text.length:
-            result += idxControl;
-            break;
+      switch (true) {
+        /**
+         * a positive integer value, get a random character
+         */
+        case controlValue && controlValue > 0:
+          result += getRandomChar();
 
-          case typeof idxControl === 'string' && i > idxRef.current:
-            result += idxControl;
-            break;
-
-          case typeof idxControl === 'string' && i <= idxRef.current:
-            result += text[i];
-            break;
-
-          case idxControl > 0:
-            result += getRandomChar();
+          if (i <= scrambleIndexRef.current) {
+            // reduce scramble index only if it's past the scrambleIndexRef
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
-            break;
+          }
+          break;
 
-          case idxControl === 0 || text[i] === ' ':
-            result += text[i];
-            controlRef.current[i] = text[i];
-            break;
+        /**
+         * a string from the previous text
+         */
+        case typeof controlValue === 'string' &&
+          (i >= text.length || i > scrambleIndexRef.current):
+          result += controlValue;
+          break;
 
-          default:
-            result += '';
-        }
+        /**
+         * before scramble index, and equal to the string
+         */
+        case controlValue === text[i] && i <= scrambleIndexRef.current:
+          result += text[i];
+          break;
+
+        /**
+         * scramble has finished
+         */
+        case controlValue === 0 && i < text.length:
+          result += text[i];
+          controlRef.current[i] = text[i];
+          break;
+
+        default:
+          result += '';
       }
     }
+
+    // apply
     nodeRef.current.innerHTML = result;
 
+    /**
+     * Condition to exit:
+     * Result is equal to text input
+     *
+     * - Trim control to text length
+     * - fire onComplete
+     */
     if (result === text) {
+      controlRef.current.splice(text.length, controlRef.current.length);
       if (onComplete) {
         onComplete();
       }
       cancelAnimationFrame(rafRef.current);
     }
 
-    incrementRef.current += 1;
+    stepRef.current += 1;
   };
 
+  /**
+   * Reset scramble controls
+   *
+   * if overwrite is true, reset the control to the an empty array, the size of the text input. This will cause the animation to play from an empty string
+   */
   const reset = () => {
-    incrementRef.current = 0;
-    idxRef.current = 0;
+    stepRef.current = 0;
+    scrambleIndexRef.current = 0;
     if (overwrite) {
       controlRef.current = new Array(text.length);
     }
   };
 
+  /**
+   * Restarts the animation
+   *
+   * Cancels the current animation frame, resets the scramble index and other controls, and requests a new animation
+   */
   const play = () => {
     cancelAnimationFrame(rafRef.current);
     reset();
     rafRef.current = requestAnimationFrame(animate);
   };
 
-  // reset increment when text is changed
+  /**
+   * reset scramble when text input is changed
+   */
   useEffect(() => {
     nodeRef.current.ariaLabel = text;
     reset();
   }, [text]);
 
-  //
+  /**
+   * start or stop animation when text and speed change
+   */
   useEffect(() => {
     cancelAnimationFrame(rafRef.current);
-    if (speed > 0.001) {
+
+    if (speed > 0) {
       rafRef.current = requestAnimationFrame(animate);
     }
+
+    // cancel raf on unmount
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [animate, speed]);
+  }, [text, speed]);
 
   return { ref: nodeRef, play };
 };
