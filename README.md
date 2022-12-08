@@ -1,6 +1,6 @@
 # useScramble
 
-A lightweight (821 B), high performance, scramble text animation for react websites.
+A lightweight (<1KB), high performance, rect-hook for text animations.
 
 The hook receives a set of parameteres that allows you to customize the pace, and style of the animation.
 
