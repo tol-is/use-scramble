@@ -82,6 +82,11 @@ export type UseScrambleProps = {
    * onComplete callback
    */
   onComplete?: Function;
+
+  /**
+   * onFrame callback
+   */
+  onFrame?: (result: string) => void;
 };
 
 export const useScramble = (props: UseScrambleProps) => {
@@ -95,6 +100,7 @@ export const useScramble = (props: UseScrambleProps) => {
     overflow = true,
     range = [65, 125],
     overdrive = 95,
+    onFrame,
     onComplete,
   } = props;
 
@@ -283,7 +289,12 @@ export const useScramble = (props: UseScrambleProps) => {
       }
     }
 
+    // set text
     nodeRef.current.innerHTML = result;
+
+    if (onFrame) {
+      onFrame(result);
+    }
 
     /**
      * Exit if the result is equal to the input
@@ -331,13 +342,8 @@ export const useScramble = (props: UseScrambleProps) => {
    * reset scramble when text input is changed
    */
   useEffect(() => {
-    nodeRef.current.ariaLabel = text;
-    reset();
-  }, [text]);
-
-  useEffect(() => {
     play();
-  }, [overdrive]);
+  }, [text, overdrive]);
 
   /**
    * start or stop animation when text and speed change

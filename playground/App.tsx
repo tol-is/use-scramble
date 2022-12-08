@@ -34,6 +34,12 @@ export const App = () => {
     seed: params.seed,
     overflow: params.overflow,
     overdrive: params.overdrive ? 95 : false,
+    onFrame: result => {
+      console.log(result);
+    },
+    onComplete: () => {
+      console.log('complete');
+    },
   });
 
   useControls(

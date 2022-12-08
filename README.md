@@ -46,7 +46,7 @@ export const App = () => {
 };
 ```
 
-### Props
+## Props
 
 | Property   | type     | default  | range | description                                                                                |
 | ---------- | -------- | -------- | ----- | ------------------------------------------------------------------------------------------ |
@@ -59,11 +59,10 @@ export const App = () => {
 | range      | number[] | [65,125] |       | Unicode characters range to select random characters from                                  |
 | overdrive  | number   | 95       | 0-∞   | Use this unicode character for overdrive mode                                              |
 | overflow   | boolean  | true     |       | Set to false to always restart the animation from an empty string                          |
-| onComplete | function | -        |       | callback invoked on completion                                                             |
+| onFrame    | function | -        |       | callback invoked on every rerender                                                         |
+| onComplete | function | -        |       | callback invoked on animation end                                                          |
 
-<!-- The controller will move forward along the text input and scramble more characters, at a pace of `tick` frames.   -->
-
-## Unicode
+## Unicode Values
 
 | Glyph  | Unicode | Description            |
 | ------ | ------- | ---------------------- |
