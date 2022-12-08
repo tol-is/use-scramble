@@ -4,10 +4,21 @@ function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min) + min);
 }
 
-function getRandomChar() {
-  const rand = getRandomInt(0, 60);
-  return String.fromCharCode(rand + 65);
+function getRandomChar(range: RangeOrCharCodes) {
+  let rand = 0;
+  if (range.length === 2) {
+    rand = getRandomInt(range[0], range[1] + 1);
+  } else {
+    rand = range[getRandomInt(0, range.length - 1)];
+  }
+
+  return String.fromCharCode(rand);
 }
+
+type RangeOrCharCodes = {
+  0: number;
+  1: number;
+} & Array<number>;
 
 export type UseScrambleProps = {
   /**
@@ -44,18 +55,20 @@ export type UseScrambleProps = {
    * onComplete callback
    */
   onComplete?: Function;
+  range?: RangeOrCharCodes;
 };
 
 export const useScramble = (props: UseScrambleProps) => {
   //
   let {
     text = '',
-    speed = 0.5,
-    seed = 0,
-    step = Math.ceil(text.length / 10),
+    speed = 1,
+    seed = 1,
+    step = 1,
     tick = 1,
-    scramble = 4,
+    scramble = 1,
     overwrite = true,
+    range = [65, 125],
     onComplete,
   } = props;
 
@@ -195,7 +208,7 @@ export const useScramble = (props: UseScrambleProps) => {
          * a positive integer value, get a random character
          */
         case controlValue && controlValue > 0:
-          result += getRandomChar();
+          result += getRandomChar(range);
 
           if (i <= scrambleIndexRef.current) {
             // reduce scramble index only if it's past the scrambleIndexRef
@@ -298,7 +311,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [text, speed, tick, step, scramble, seed]);
+  }, [text, speed, animate]);
 
   return { ref: nodeRef, play };
 };
