@@ -17,9 +17,9 @@ export const App = () => {
 
   const [values, set] = useControls(() => ({
     speed: { value: 0.75, min: 0, max: 1, step: 0.01 },
-    scramble: { value: 3, min: 0, max: 42, step: 1 },
-    step: { value: 8, min: 1, max: 42, step: 1 },
     tick: { value: 1, min: 1, max: 10, step: 1 },
+    step: { value: 8, min: 1, max: 42, step: 1 },
+    scramble: { value: 3, min: 0, max: 42, step: 1 },
     seed: { value: 1, min: 0, max: 10, step: 1 },
     overwrite: false,
   }));
