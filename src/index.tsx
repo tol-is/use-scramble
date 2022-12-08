@@ -298,7 +298,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [text, speed]);
+  }, [text, speed, tick, step, scramble, seed]);
 
   return { ref: nodeRef, play };
 };
