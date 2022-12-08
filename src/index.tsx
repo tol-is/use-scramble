@@ -13,7 +13,7 @@ export type UseScrambleProps = {
   text: string;
   speed?: number;
   seed?: number;
-  step?: number;
+  increment?: number;
   interval?: number;
   scramble?: number;
   overwrite?: boolean;
@@ -22,16 +22,31 @@ export type UseScrambleProps = {
 
 export const useScramble = (props: UseScrambleProps) => {
   //
-  const {
+  let {
     text = '',
     speed = 0.5,
     seed = 0,
-    step = Math.ceil(text.length / 10),
+    increment = Math.ceil(text.length / 10),
     interval = 1,
     scramble = 4,
     overwrite = true,
     onComplete,
   } = props;
+
+  if (speed === 0) {
+    increment = 1;
+    console.error('speed 0 will stop the animation');
+  }
+
+  if (increment < 1) {
+    increment = 1;
+    console.error('increment must be at least 1. ');
+  }
+
+  if (interval < 1) {
+    interval = 1;
+    console.error('interval must be at least 1');
+  }
 
   // text node ref
   const nodeRef = useRef<any>(null);
@@ -43,8 +58,8 @@ export const useScramble = (props: UseScrambleProps) => {
   const elapsedRef = useRef(0);
   const fpsInterval = 1000 / (30 * speed);
 
-  // scramble step
-  const stepRef = useRef<number>(0);
+  // scramble increment
+  const incrementRef = useRef<number>(0);
 
   // current character index ref
   const idxRef = useRef<number>(0);
@@ -69,14 +84,14 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < seed; i++) {
       const index = getRandomInt(idxRef.current, text.length - 1);
       if (typeof controlRef.current[index] !== 'number') {
-        controlRef.current[index] = getRandomScramble();
+        // controlRef.current[index] = getRandomScramble();
       }
     }
   };
 
-  // add `step` characters to the randomizer, and increase the idxRef pointer
+  // add `increment` characters to the randomizer, and increase the idxRef pointer
   const moveControlIndex = () => {
-    for (var i = 0; i < step; i++) {
+    for (var i = 0; i < increment; i++) {
       if (idxRef.current < controlRef.current.length) {
         const currentIndex = idxRef.current;
         controlRef.current[currentIndex] = getRandomScramble();
@@ -87,7 +102,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   const increaseControl = () => {
     if (text.length > controlRef.current.length) {
-      for (var i = 0; i < step; i++) {
+      for (var i = 0; i < increment; i++) {
         if (controlRef.current.length + 1 < text.length) {
           controlRef.current.push(undefined);
         }
@@ -97,12 +112,13 @@ export const useScramble = (props: UseScrambleProps) => {
 
   const decreaseControl = () => {
     if (text.length < controlRef.current.length) {
-      controlRef.current.splice(text.length, step);
+      controlRef.current.splice(text.length, increment);
     }
   };
 
   // draw when fpsInterval time has passed. fpsInterval is computed by the `speed` prop
   const animate = (time: number) => {
+    // console.log('animate');
     const timeElapsed = time - elapsedRef.current;
 
     rafRef.current = requestAnimationFrame(animate);
@@ -113,79 +129,75 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  // redraw text on every step and increment stepRef
+  // redraw text on every increment and increment incrementRef
   const draw = () => {
     if (!nodeRef.current) return;
 
-    if (stepRef.current % interval === 0) {
+    if (incrementRef.current % interval === 0) {
       increaseControl();
       decreaseControl();
       moveControlIndex();
       seedRandomCharacters();
     }
 
-    let newString = '';
-    let charsDone = 0;
+    let result = '';
+
+    // controlRef.current.forEach(v => {
+    //   if (v === undefined) {
+    //     console.log('boom');
+    //     debugger;
+    //   }
+    // });
+    // console.log(controlRef.current);
 
     for (var i = 0; i < controlRef.current.length; i++) {
       const idxControl = controlRef.current[i];
 
       if (typeof idxControl === 'undefined') {
-        newString += '';
+        result += '';
       } else {
         switch (true) {
-          case i >= text.length && typeof idxControl === 'string':
-            newString += idxControl;
-            break;
-
-          case i >= text.length:
-            newString += getRandomChar();
-            controlRef.current[i] = (controlRef.current[i] as number) - 1;
+          case typeof idxControl === 'string' && i >= text.length:
+            result += idxControl;
             break;
 
           case typeof idxControl === 'string' && i > idxRef.current:
-            newString += idxControl;
+            result += idxControl;
             break;
 
           case typeof idxControl === 'string' && i <= idxRef.current:
-            newString += text[i];
-            charsDone++;
-            break;
-
-          case idxControl === 0 || text[i] === ' ':
-            newString += text[i];
-            controlRef.current[i] = text[i];
-            charsDone++;
-            break;
-
-          case idxControl > 0 && i <= idxRef.current:
-            newString += getRandomChar();
-            controlRef.current[i] = (controlRef.current[i] as number) - 1;
+            result += text[i];
             break;
 
           case idxControl > 0:
-            newString += getRandomChar();
+            result += getRandomChar();
+            controlRef.current[i] = (controlRef.current[i] as number) - 1;
+            break;
+
+          case idxControl === 0 || text[i] === ' ':
+            result += text[i];
+            controlRef.current[i] = text[i];
             break;
 
           default:
-            newString += '';
+            result += '';
         }
       }
     }
-    nodeRef.current.innerHTML = newString;
+    nodeRef.current.innerHTML = result;
 
-    if (charsDone === text.length) {
+    if (result === text) {
       if (onComplete) {
         onComplete();
       }
       cancelAnimationFrame(rafRef.current);
     }
 
-    stepRef.current += 1;
+    incrementRef.current += 1;
   };
 
   const reset = () => {
-    stepRef.current = 0;
+    incrementRef.current = 0;
     idxRef.current = 0;
     if (overwrite) {
       controlRef.current = new Array(text.length);
@@ -198,7 +210,7 @@ export const useScramble = (props: UseScrambleProps) => {
     rafRef.current = requestAnimationFrame(animate);
   };
 
-  // reset step when text is changed
+  // reset increment when text is changed
   useEffect(() => {
     nodeRef.current.ariaLabel = text;
     reset();
