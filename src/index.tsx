@@ -71,7 +71,7 @@ export type UseScrambleProps = {
   /**
    * Set the animation to overdrive mode, and set the unicode character code to use in the animation
    */
-  overdrive?: false | number;
+  overdrive?: boolean | number;
   /**
    * Always start text animation from an empty string
    *
@@ -99,7 +99,7 @@ export const useScramble = (props: UseScrambleProps) => {
     scramble = 1,
     overflow = true,
     range = [65, 125],
-    overdrive = 95,
+    overdrive = true,
     onFrame,
     onComplete,
   } = props;
@@ -195,7 +195,9 @@ export const useScramble = (props: UseScrambleProps) => {
         controlRef.current[overdriveRef.current] =
           text[overdriveRef.current] === ' '
             ? ' '
-            : String.fromCharCode(overdrive);
+            : String.fromCharCode(
+                typeof overdrive === 'boolean' ? 95 : overdrive
+              );
         overdriveRef.current += 1;
       }
     }

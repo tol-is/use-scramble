@@ -27,13 +27,7 @@ export const App = () => {
 
   const { ref, play } = useScramble({
     text: sample,
-    speed: params.speed,
-    tick: params.tick,
-    step: params.step,
-    scramble: params.scramble,
-    seed: params.seed,
-    overflow: params.overflow,
-    overdrive: params.overdrive ? 95 : false,
+    ...params,
     onFrame: result => {
       console.log(result);
     },

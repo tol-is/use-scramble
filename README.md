@@ -48,19 +48,19 @@ export const App = () => {
 
 ## Props
 
-| Property   | type     | default  | range | description                                                                                |
-| ---------- | -------- | -------- | ----- | ------------------------------------------------------------------------------------------ |
-| text       | string   |          |       | text to scramble.                                                                          |
-| speed      | number   | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation           |
-| tick       | number   | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                |
-| step       | number   | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                               |
-| scramble   | number   | 1        | 0-∞   | How many times to randomize each character. A value of 0 will emulate a typewriter effect. |
-| seed       | number   | 1        | 0-∞   | Adds random characters ahead of the animation sequence                                     |
-| range      | number[] | [65,125] |       | Unicode characters range to select random characters from                                  |
-| overdrive  | number   | 95       | 0-∞   | Use this unicode character for overdrive mode                                              |
-| overflow   | boolean  | true     |       | Set to false to always restart the animation from an empty string                          |
-| onFrame    | function | -        |       | callback invoked on every rerender                                                         |
-| onComplete | function | -        |       | callback invoked on animation end                                                          |
+| Property   | type            | default  | range | description                                                                                |
+| ---------- | --------------- | -------- | ----- | ------------------------------------------------------------------------------------------ |
+| text       | string          |          |       | text to scramble.                                                                          |
+| speed      | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation           |
+| tick       | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                |
+| step       | number          | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                               |
+| scramble   | number          | 1        | 0-∞   | How many times to randomize each character. A value of 0 will emulate a typewriter effect. |
+| seed       | number          | 1        | 0-∞   | Adds random characters ahead of the animation sequence                                     |
+| range      | number[]        | [65,125] |       | Unicode characters range to select random characters from                                  |
+| overdrive  | boolean, number | true     |       | Defaults to underscore (95) unicode character, or provide a custom unicode value           |
+| overflow   | boolean         | true     |       | Set to false to always restart the animation from an empty string                          |
+| onFrame    | function        | -        |       | callback invoked on every rerender                                                         |
+| onComplete | function        | -        |       | callback invoked on animation end                                                          |
 
 ## Unicode Values
 
