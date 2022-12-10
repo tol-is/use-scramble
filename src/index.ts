@@ -22,7 +22,7 @@ type RangeOrCharCodes = {
 
 export type UseScrambleProps = {
   /**
-   * Optional non-animation, initial text input value
+   * Optional non-animated, initial text input value
    */
   initialText?: string;
   /**
@@ -156,8 +156,8 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // pick random character ahead in the string, and add them to the randomizer
   const seedForward = () => {
-    if (!scrambleText) return;
-    if (scrambleIndexRef.current === scrambleText.length) return;
+    if (!scrambleText || scrambleIndexRef.current === scrambleText.length)
+      return;
 
     for (var i = 0; i < seed; i++) {
       const index = getRandomInt(
@@ -200,8 +200,7 @@ export const useScramble = (props: UseScrambleProps) => {
   };
 
   const decreaseControl = () => {
-    if (!scrambleText) return;
-    if (scrambleText.length < controlRef.current.length) {
+    if (scrambleText && scrambleText.length < controlRef.current.length) {
       controlRef.current.splice(scrambleText.length, step);
     }
   };
@@ -375,9 +374,9 @@ export const useScramble = (props: UseScrambleProps) => {
    */
   useEffect(() => {
     if (text) {
-      play();
+      reset();
     }
-  }, [text]);
+  }, [text, overdrive]);
 
   /**
    * start or stop animation when text and speed change
