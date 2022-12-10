@@ -37,9 +37,6 @@ export const App = () => {
     step: 1,
     scramble: 4,
     seed: 0,
-    onComplete: () => {
-      window.alert('Scramble over');
-    },
   });
 
   return <p ref={ref} />;
