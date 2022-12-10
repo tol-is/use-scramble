@@ -151,9 +151,12 @@ export const useScramble = (props: UseScrambleProps) => {
         scrambleIndexRef.current,
         controlRef.current.length - 1
       );
-      if (typeof controlRef.current[index] !== 'number') {
+      if (
+        typeof controlRef.current[index] !== 'number' &&
+        typeof controlRef.current[index] !== 'undefined'
+      ) {
         controlRef.current[index] =
-          controlRef.current[index] === ' ' ? ' ' : scramble;
+          controlRef.current[index] === ' ' ? ' ' : scramble || seed;
       }
     }
   };
