@@ -14,7 +14,7 @@
     "randomizer",
     "yugop"
   ],
-  "version": "2.1.0",
+  "version": "2.1.1",
   "license": "MIT",
   "module": "dist/use-scramble.esm.js",
   "main": "dist/index.js",
