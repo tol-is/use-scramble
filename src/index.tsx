@@ -147,7 +147,7 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < seed; i++) {
       const index = getRandomInt(
         scrambleIndexRef.current,
-        controlRef.current.length - 1
+        controlRef.current.length
       );
       if (
         typeof controlRef.current[index] !== 'number' &&
