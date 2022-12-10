@@ -25,25 +25,20 @@ export const App = () => {
     overflow: true,
   });
 
-  const { ref, play } = useScramble({
+  const { ref, replay } = useScramble({
     text: sample,
+    initialText: generateWords(),
     ...params,
-    onFrame: result => {
-      console.log(result);
-    },
-    onComplete: () => {
-      console.log('complete');
-    },
   });
 
   useControls(
     {
-      play: button(() => play()),
+      Replay: button(() => replay()),
       Randomize: button(() => {
         setSample(generateWords());
       }),
     },
-    [play]
+    [replay]
   );
 
   return (

@@ -22,6 +22,10 @@ type RangeOrCharCodes = {
 
 export type UseScrambleProps = {
   /**
+   * Optional non-animation, initial text input value
+   */
+  initialText?: string;
+  /**
    * Optional text input
    */
   text?: string;
@@ -78,19 +82,26 @@ export type UseScrambleProps = {
    * @default false
    */
   overflow?: boolean;
-  /**
-   * onComplete callback
-   */
-  onComplete?: Function;
 
   /**
-   * onFrame callback
+   * Callback when animation starts drawing
    */
-  onFrame?: (result: string) => void;
+  onAnimationStart?: Function;
+
+  /**
+   * Callback for when the animation finished
+   */
+  onAnimationEnd?: Function;
+
+  /**
+   * onRedraw callback
+   */
+  onAnimationFrame?: (result: string) => void;
 };
 
 export const useScramble = (props: UseScrambleProps) => {
   let {
+    initialText,
     text,
     speed = 1,
     seed = 1,
@@ -100,9 +111,9 @@ export const useScramble = (props: UseScrambleProps) => {
     overflow = true,
     range = [65, 125],
     overdrive = true,
-    onStart,
-    onFrame,
-    onComplete,
+    onAnimationStart,
+    onAnimationFrame,
+    onAnimationEnd,
   } = props;
 
   if (speed === 0) {
@@ -141,10 +152,12 @@ export const useScramble = (props: UseScrambleProps) => {
   // overdrive control index
   const overdriveRef = useRef<number>(0);
 
+  const scrambleText = text || initialText;
+
   // pick random character ahead in the string, and add them to the randomizer
   const seedForward = () => {
-    if (!text) return;
-    if (scrambleIndexRef.current === text.length) return;
+    if (!scrambleText) return;
+    if (scrambleIndexRef.current === scrambleText.length) return;
 
     for (var i = 0; i < seed; i++) {
       const index = getRandomInt(
@@ -163,43 +176,43 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // add `step` characters to the randomizer, and increase the scrambleIndexRef pointer
   const stepForward = () => {
-    if (!text) return;
+    if (!scrambleText) return;
     for (var i = 0; i < step; i++) {
-      if (scrambleIndexRef.current < text.length) {
+      if (scrambleIndexRef.current < scrambleText.length) {
         const currentIndex = scrambleIndexRef.current;
 
         controlRef.current[currentIndex] =
-          text[scrambleIndexRef.current] === ' ' ? ' ' : scramble;
+          scrambleText[scrambleIndexRef.current] === ' ' ? ' ' : scramble;
         scrambleIndexRef.current += 1;
       }
     }
   };
 
   const increaseControl = () => {
-    if (!text) return;
+    if (!scrambleText) return;
     for (var i = 0; i < step; i++) {
-      if (controlRef.current.length + 1 <= text.length) {
+      if (controlRef.current.length + 1 <= scrambleText.length) {
         controlRef.current.push(
-          text[controlRef.current.length + 1] === ' ' ? ' ' : null
+          scrambleText[controlRef.current.length + 1] === ' ' ? ' ' : null
         );
       }
     }
   };
 
   const decreaseControl = () => {
-    if (!text) return;
-    if (text.length < controlRef.current.length) {
-      controlRef.current.splice(text.length, step);
+    if (!scrambleText) return;
+    if (scrambleText.length < controlRef.current.length) {
+      controlRef.current.splice(scrambleText.length, step);
     }
   };
 
   const handleOverdrive = () => {
-    if (!overdrive || !text) return;
+    if (!overdrive || !scrambleText) return;
 
     for (var i = 0; i < step; i++) {
       if (overdriveRef.current < controlRef.current.length + 1) {
         controlRef.current[overdriveRef.current] =
-          text[overdriveRef.current] === ' '
+          scrambleText[overdriveRef.current] === ' '
             ? ' '
             : String.fromCharCode(
                 typeof overdrive === 'boolean' ? 95 : overdrive
@@ -249,7 +262,7 @@ export const useScramble = (props: UseScrambleProps) => {
    * Redraw text on every animation frame
    */
   const draw = () => {
-    if (!nodeRef.current || !text) return;
+    if (!nodeRef.current || !scrambleText) return;
 
     let result = '';
 
@@ -273,23 +286,23 @@ export const useScramble = (props: UseScrambleProps) => {
          * a string from the previous text
          */
         case typeof controlValue === 'string' &&
-          (i >= text.length || i > scrambleIndexRef.current):
+          (i >= scrambleText.length || i > scrambleIndexRef.current):
           result += controlValue;
           break;
 
         /**
          * before scramble index, and equal to the string
          */
-        case controlValue === text[i] && i <= scrambleIndexRef.current:
-          result += text[i];
+        case controlValue === scrambleText[i] && i <= scrambleIndexRef.current:
+          result += scrambleText[i];
           break;
 
         /**
          * scramble has finished
          */
-        case controlValue === 0 && i < text.length:
-          result += text[i];
-          controlRef.current[i] = text[i];
+        case controlValue === 0 && i < scrambleText.length:
+          result += scrambleText[i];
+          controlRef.current[i] = scrambleText[i];
           break;
 
         default:
@@ -300,20 +313,20 @@ export const useScramble = (props: UseScrambleProps) => {
     // set text
     nodeRef.current.innerHTML = result;
 
-    if (onFrame) {
-      onFrame(result);
+    if (onAnimationFrame) {
+      onAnimationFrame(result);
     }
 
     /**
      * Exit if the result is equal to the input
      *
      * - Trim control to text length
-     * - fire onComplete
+     * - fire onAnimationEnd
      */
-    if (result === text) {
-      controlRef.current.splice(text.length, controlRef.current.length);
-      if (onComplete) {
-        onComplete();
+    if (result === scrambleText) {
+      controlRef.current.splice(scrambleText.length, controlRef.current.length);
+      if (onAnimationEnd) {
+        onAnimationEnd();
       }
       cancelAnimationFrame(rafRef.current);
     }
@@ -343,15 +356,28 @@ export const useScramble = (props: UseScrambleProps) => {
   const play = () => {
     cancelAnimationFrame(rafRef.current);
     reset();
+    if (onAnimationStart) {
+      onAnimationStart();
+    }
     rafRef.current = requestAnimationFrame(animate);
   };
+
+  useEffect(() => {
+    if (initialText && nodeRef.current.innerHTML == '') {
+      nodeRef.current.innerHTML = initialText;
+      controlRef.current = initialText.split('');
+      scrambleIndexRef.current = controlRef.current.length;
+    }
+  }, [initialText]);
 
   /**
    * reset scramble when text input is changed
    */
   useEffect(() => {
-    play();
-  }, [text, overdrive]);
+    if (text) {
+      play();
+    }
+  }, [text]);
 
   /**
    * start or stop animation when text and speed change
@@ -359,7 +385,7 @@ export const useScramble = (props: UseScrambleProps) => {
   useEffect(() => {
     cancelAnimationFrame(rafRef.current);
 
-    if (speed > 0) {
+    if (speed > 0 && text) {
       rafRef.current = requestAnimationFrame(animate);
     }
 
@@ -369,5 +395,5 @@ export const useScramble = (props: UseScrambleProps) => {
     };
   }, [text, speed, animate]);
 
-  return { ref: nodeRef, play };
+  return { ref: nodeRef, replay: play };
 };
