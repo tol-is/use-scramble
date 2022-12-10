@@ -135,9 +135,7 @@ export const useScramble = (props: UseScrambleProps) => {
   const scrambleIndexRef = useRef<number>(0);
 
   // scramble controller
-  const controlRef = useRef<Array<string | number | null>>(
-    new Array(text.length)
-  );
+  const controlRef = useRef<Array<string | number | null>>([]);
 
   // overdrive control index
   const overdriveRef = useRef<number>(0);
