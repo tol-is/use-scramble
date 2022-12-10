@@ -13,7 +13,7 @@ const generateWords = (index = null) =>
   tragedy[index || getRandomInt(0, tragedy.length)];
 
 export const App = () => {
-  const [sample, setSample] = React.useState(generateWords());
+  const [sample, setSample] = React.useState(null);
 
   const params = useControls({
     overdrive: true,

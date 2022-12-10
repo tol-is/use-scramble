@@ -22,9 +22,9 @@ type RangeOrCharCodes = {
 
 export type UseScrambleProps = {
   /**
-   * Text input
+   * Optional text input
    */
-  text: string;
+  text?: string;
   /**
    * 0-1 range that determines the scramble speed. A speed of 1 will redraw 60 times a second. A speed of 0 will pause the animation
    *
@@ -91,7 +91,7 @@ export type UseScrambleProps = {
 
 export const useScramble = (props: UseScrambleProps) => {
   let {
-    text = '',
+    text,
     speed = 1,
     seed = 1,
     step = 1,
@@ -100,6 +100,7 @@ export const useScramble = (props: UseScrambleProps) => {
     overflow = true,
     range = [65, 125],
     overdrive = true,
+    onStart,
     onFrame,
     onComplete,
   } = props;
@@ -142,6 +143,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // pick random character ahead in the string, and add them to the randomizer
   const seedForward = () => {
+    if (!text) return;
     if (scrambleIndexRef.current === text.length) return;
 
     for (var i = 0; i < seed; i++) {
@@ -161,6 +163,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   // add `step` characters to the randomizer, and increase the scrambleIndexRef pointer
   const stepForward = () => {
+    if (!text) return;
     for (var i = 0; i < step; i++) {
       if (scrambleIndexRef.current < text.length) {
         const currentIndex = scrambleIndexRef.current;
@@ -173,6 +176,7 @@ export const useScramble = (props: UseScrambleProps) => {
   };
 
   const increaseControl = () => {
+    if (!text) return;
     for (var i = 0; i < step; i++) {
       if (controlRef.current.length + 1 <= text.length) {
         controlRef.current.push(
@@ -183,13 +187,14 @@ export const useScramble = (props: UseScrambleProps) => {
   };
 
   const decreaseControl = () => {
+    if (!text) return;
     if (text.length < controlRef.current.length) {
       controlRef.current.splice(text.length, step);
     }
   };
 
   const handleOverdrive = () => {
-    if (!overdrive) return;
+    if (!overdrive || !text) return;
 
     for (var i = 0; i < step; i++) {
       if (overdriveRef.current < controlRef.current.length + 1) {
@@ -244,7 +249,7 @@ export const useScramble = (props: UseScrambleProps) => {
    * Redraw text on every animation frame
    */
   const draw = () => {
-    if (!nodeRef.current) return;
+    if (!nodeRef.current || !text) return;
 
     let result = '';
 
@@ -326,7 +331,7 @@ export const useScramble = (props: UseScrambleProps) => {
     scrambleIndexRef.current = 0;
     overdriveRef.current = 0;
     if (!overflow) {
-      controlRef.current = new Array(text.length);
+      controlRef.current = new Array(text?.length);
     }
   };
 
