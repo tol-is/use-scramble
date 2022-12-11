@@ -47,7 +47,7 @@ export const App = () => {
 
 | Property         | type            | default  | range | description                                                                                |
 | ---------------- | --------------- | -------- | ----- | ------------------------------------------------------------------------------------------ |
-| initialText      | string          |          |       | Default text content. This value will not be animated.                                     |
+| playOnMount      | boolean         |          |       | Skip the animation on the first text input                                                 |
 | text             | string          |          |       | Text value to scramble to                                                                  |
 | speed            | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation           |
 | tick             | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                |
