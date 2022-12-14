@@ -218,9 +218,9 @@ export const useScramble = (props: UseScrambleProps) => {
   };
 
   const handleTick = () => {
+    stepForward();
     increaseControl();
     decreaseControl();
-    stepForward();
     seedForward();
   };
 
@@ -246,7 +246,6 @@ export const useScramble = (props: UseScrambleProps) => {
       if (stepRef.current % tick === 0) {
         handleTick();
       }
-
       draw();
     }
   };
@@ -266,7 +265,7 @@ export const useScramble = (props: UseScrambleProps) => {
         /**
          * a positive integer value, get a random character
          */
-        case controlValue && controlValue > 0:
+        case typeof controlValue === 'number' && controlValue > 0:
           result += getRandomChar(range);
 
           if (i <= scrambleIndexRef.current) {
