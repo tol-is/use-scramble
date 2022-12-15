@@ -186,7 +186,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   const increaseControl = () => {
     for (var i = 0; i < step; i++) {
-      if (controlRef.current.length + 1 <= text.length) {
+      if (controlRef.current.length < text.length) {
         controlRef.current.push(
           text[controlRef.current.length + 1] === ' ' ? ' ' : null
         );
@@ -201,11 +201,12 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const handleOverdrive = () => {
+  const onOverdrive = () => {
     if (!overdrive) return;
 
     for (var i = 0; i < step; i++) {
-      if (overdriveRef.current < controlRef.current.length + 1) {
+      const max = Math.max(controlRef.current.length, text.length);
+      if (overdriveRef.current < max) {
         controlRef.current[overdriveRef.current] =
           text[overdriveRef.current] === ' '
             ? ' '
@@ -217,7 +218,7 @@ export const useScramble = (props: UseScrambleProps) => {
     }
   };
 
-  const handleTick = () => {
+  const onTick = () => {
     stepForward();
     increaseControl();
     decreaseControl();
@@ -237,15 +238,16 @@ export const useScramble = (props: UseScrambleProps) => {
     rafRef.current = requestAnimationFrame(animate);
 
     if (overdrive) {
-      handleOverdrive();
+      onOverdrive();
     }
 
     if (timeElapsed > fpsInterval) {
       elapsedRef.current = time;
 
       if (stepRef.current % tick === 0) {
-        handleTick();
+        onTick();
       }
+
       draw();
     }
   };
@@ -278,14 +280,14 @@ export const useScramble = (props: UseScrambleProps) => {
          * a string from the previous text
          */
         case typeof controlValue === 'string' &&
-          (i >= text.length || i > scrambleIndexRef.current):
+          (i >= text.length || i >= scrambleIndexRef.current):
           result += controlValue;
           break;
 
         /**
          * before scramble index, and equal to the string
          */
-        case controlValue === text[i] && i <= scrambleIndexRef.current:
+        case controlValue === text[i] && i < scrambleIndexRef.current:
           result += text[i];
           break;
 
@@ -366,7 +368,7 @@ export const useScramble = (props: UseScrambleProps) => {
     } else {
       reset();
     }
-  }, [text, overdrive]);
+  }, [text, overdrive, overflow]);
 
   /**
    * start or stop animation when text and speed change
