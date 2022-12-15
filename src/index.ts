@@ -9,7 +9,7 @@ function getRandomChar(range: RangeOrCharCodes) {
   if (range.length === 2) {
     rand = getRandomInt(range[0], range[1] + 1);
   } else {
-    rand = range[getRandomInt(0, range.length - 1)];
+    rand = range[getRandomInt(0, range.length)];
   }
 
   return String.fromCharCode(rand);
