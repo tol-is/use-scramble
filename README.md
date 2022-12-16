@@ -12,7 +12,7 @@ The hook receives a set of parameteres that allows you to customize the pace, an
   yarn dev
 ```
 
-Will start the `playground` minisite and build the library on watch mode
+Will start the `playground` minisite at `http://localhost:1234` and build the library on watch mode
 
 ---
 
@@ -21,10 +21,12 @@ Will start the `playground` minisite and build the library on watch mode
 ### Install to your react application
 
 ```sh
-  yarn add use-scramble
+  npm install use-scramble
 ```
 
 ### Import and call the `useScramble` hook
+
+The hook returns a `ref` object, that you must apply to the target node, for the animation to take over.
 
 ```jsx
 import { useScramble } from 'use-scramble';
@@ -47,8 +49,8 @@ export const App = () => {
 
 | Property         | type            | default  | range | description                                                                                |
 | ---------------- | --------------- | -------- | ----- | ------------------------------------------------------------------------------------------ |
-| playOnMount      | boolean         |          |       | Skip the animation on the first text input                                                 |
-| text             | string          |          |       | Text value to scramble to                                                                  |
+| playOnMount      | boolean         | true     |       | Skip the animation on the first text input                                                 |
+| text             | string          | -        |       | Text value to scramble to                                                                  |
 | speed            | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation           |
 | tick             | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                |
 | step             | number          | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                               |
@@ -60,6 +62,16 @@ export const App = () => {
 | onAnimationStart | function        | -        |       | callback invoked when the animation starts playing                                         |
 | onAnimationFrame | function        | -        |       | callback invoked on every rerender                                                         |
 | onAnimationEnd   | function        | -        |       | callback invoked on when the animation ends                                                |
+
+## Return Values
+
+Along with the `ref` the return value, contains a `replay` function, that you can invoke to restart the animation.
+
+```jsx
+const { ref, replay } = useScramble({ text: 'your_text' });
+
+return <p ref={ref} onclick={replay} />;
+```
 
 ## Unicode Values
 

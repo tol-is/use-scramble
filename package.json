@@ -1,7 +1,8 @@
 {
   "name": "use-scramble",
   "author": "Tolis Christodoulou <me@tol.is>",
-  "homepage": "https://github.com/tol-is/use-scramble#readme",
+  "homepage": "https://use-scramble.dev",
+  "repository": "https://github.com/tol-is/use-scramble#readme",
   "keywords": [
     "typescript",
     "react",
@@ -14,7 +15,7 @@
     "randomizer",
     "yugop"
   ],
-  "version": "2.2.4",
+  "version": "2.2.5",
   "license": "MIT",
   "module": "dist/use-scramble.esm.js",
   "main": "dist/index.js",
