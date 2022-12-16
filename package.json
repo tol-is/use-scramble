@@ -2,7 +2,8 @@
   "name": "use-scramble",
   "author": "Tolis Christodoulou <me@tol.is>",
   "homepage": "https://use-scramble.dev",
-  "repository": "https://github.com/tol-is/use-scramble#readme",
+  "repository": "https://github.com/tol-is/use-scramble",
+  "description": "React hook for random text animations",
   "keywords": [
     "typescript",
     "react",
@@ -15,7 +16,7 @@
     "randomizer",
     "yugop"
   ],
-  "version": "2.2.5",
+  "version": "2.2.6",
   "license": "MIT",
   "module": "dist/use-scramble.esm.js",
   "main": "dist/index.js",
