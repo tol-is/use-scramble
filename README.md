@@ -73,6 +73,12 @@ const { ref, replay } = useScramble({ text: 'your_text' });
 return <p ref={ref} onclick={replay} />;
 ```
 
+## Reduced Motion
+
+If the user has requested to minimize non-essential motion with `prefers-reduced-motion:reduce`, the animation is entirely disabled.
+
+Alternative recipes to tone down the animation are possible and currently considered. It's difficult to determine at what degree motion is essential.
+
 ## Unicode Values
 
 | Glyph  | Unicode | Description            |
