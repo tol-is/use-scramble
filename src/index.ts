@@ -130,6 +130,17 @@ export const useScramble = (props: UseScrambleProps) => {
     console.error('tick must be at least 1');
   }
 
+  const prefersReducedMotion = window.matchMedia(
+    '(prefers-reduced-motion: reduce)'
+  ).matches;
+
+  if (prefersReducedMotion) {
+    step = text.length;
+    scramble = 0;
+    seed = 0;
+    overdrive = false;
+  }
+
   // text node ref
   const nodeRef = useRef<any>(null);
 
