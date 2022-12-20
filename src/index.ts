@@ -113,7 +113,7 @@ export const useScramble = (props: UseScrambleProps) => {
     step = 1,
     tick = 1,
     scramble = 1,
-    chance = 0.5,
+    chance = 1,
     overflow = true,
     range = [65, 125],
     overdrive = true,
