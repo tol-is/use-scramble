@@ -47,6 +47,11 @@ export type UseScrambleProps = {
    * @default 1
    */
   step?: number;
+
+  /**
+   * Chance of scrambling a character, range from 0 to 1, 0 being no chance, and 1 being 100% chance
+   */
+  chance?: number;
   /**
    * Randomize `seed` characters at random text positions
    *
@@ -108,6 +113,7 @@ export const useScramble = (props: UseScrambleProps) => {
     step = 1,
     tick = 1,
     scramble = 1,
+    chance = 0.5,
     overflow = true,
     range = [65, 125],
     overdrive = true,
@@ -115,20 +121,6 @@ export const useScramble = (props: UseScrambleProps) => {
     onAnimationFrame,
     onAnimationEnd,
   } = props;
-
-  if (speed === 0) {
-    console.error('speed 0 will stop the animation');
-  }
-
-  if (step < 1) {
-    step = 1;
-    console.error('step must be at least 1. ');
-  }
-
-  if (tick < 1) {
-    tick = 1;
-    console.error('tick must be at least 1');
-  }
 
   const prefersReducedMotion = window.matchMedia(
     '(prefers-reduced-motion: reduce)'
@@ -177,7 +169,11 @@ export const useScramble = (props: UseScrambleProps) => {
         typeof controlRef.current[index] !== 'undefined'
       ) {
         controlRef.current[index] =
-          controlRef.current[index] === ' ' ? ' ' : scramble || seed;
+          controlRef.current[index] === ' '
+            ? ' '
+            : getRandomInt(0, 10) > (1 - chance) * 10
+            ? scramble || seed
+            : 0;
       }
     }
   };
@@ -188,27 +184,30 @@ export const useScramble = (props: UseScrambleProps) => {
       if (scrambleIndexRef.current < text.length) {
         const currentIndex = scrambleIndexRef.current;
 
+        const shouldScramble = getRandomInt(0, 10) > (1 - chance) * 10;
+
         controlRef.current[currentIndex] =
-          text[scrambleIndexRef.current] === ' ' ? ' ' : scramble;
-        scrambleIndexRef.current += 1;
+          text[scrambleIndexRef.current] === ' '
+            ? ' '
+            : shouldScramble
+            ? scramble
+            : 0;
+        scrambleIndexRef.current++;
       }
     }
   };
 
-  const increaseControl = () => {
+  const resizeControl = () => {
+    if (text.length < controlRef.current.length) {
+      controlRef.current.pop();
+      controlRef.current.splice(text.length, step);
+    }
     for (var i = 0; i < step; i++) {
       if (controlRef.current.length < text.length) {
         controlRef.current.push(
           text[controlRef.current.length + 1] === ' ' ? ' ' : null
         );
       }
-    }
-  };
-
-  const decreaseControl = () => {
-    if (text.length < controlRef.current.length) {
-      controlRef.current.pop();
-      controlRef.current.splice(text.length, step);
     }
   };
 
@@ -224,15 +223,14 @@ export const useScramble = (props: UseScrambleProps) => {
             : String.fromCharCode(
                 typeof overdrive === 'boolean' ? 95 : overdrive
               );
-        overdriveRef.current += 1;
+        overdriveRef.current++;
       }
     }
   };
 
   const onTick = () => {
     stepForward();
-    increaseControl();
-    decreaseControl();
+    resizeControl();
     seedForward();
   };
 
@@ -244,14 +242,11 @@ export const useScramble = (props: UseScrambleProps) => {
   const animate = (time: number) => {
     if (!speed) return;
 
-    const timeElapsed = time - elapsedRef.current;
-
     rafRef.current = requestAnimationFrame(animate);
 
-    if (overdrive) {
-      onOverdrive();
-    }
+    onOverdrive();
 
+    const timeElapsed = time - elapsedRef.current;
     if (timeElapsed > fpsInterval) {
       elapsedRef.current = time;
 
@@ -336,7 +331,7 @@ export const useScramble = (props: UseScrambleProps) => {
       cancelAnimationFrame(rafRef.current);
     }
 
-    stepRef.current += 1;
+    stepRef.current++;
   };
 
   /**
@@ -387,7 +382,7 @@ export const useScramble = (props: UseScrambleProps) => {
   useEffect(() => {
     cancelAnimationFrame(rafRef.current);
 
-    if (speed > 0) rafRef.current = requestAnimationFrame(animate);
+    rafRef.current = requestAnimationFrame(animate);
 
     // cancel raf on unmount
     return () => {

@@ -22,6 +22,7 @@ export const App = () => {
     step: { value: 1, min: 1, max: 42, step: 1 },
     scramble: { value: 4, min: 0, max: 42, step: 1 },
     seed: { value: 0, min: 0, max: 10, step: 1 },
+    chance: { value: 0.85, min: 0, max: 1, step: 0.01 },
     overflow: false,
   });
 
