@@ -1,15 +1,15 @@
 import { useEffect, useRef } from 'react';
 
 function getRandomInt(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min) + min);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function getRandomChar(range: RangeOrCharCodes) {
   let rand = 0;
   if (range.length === 2) {
-    rand = getRandomInt(range[0], range[1] + 1);
+    rand = getRandomInt(range[0], range[1]);
   } else {
-    rand = range[getRandomInt(0, range.length)];
+    rand = range[getRandomInt(0, range.length - 1)];
   }
 
   return String.fromCharCode(rand);
@@ -179,7 +179,7 @@ export const useScramble = (props: UseScrambleProps) => {
       ) {
         controlRef.current[index] = setIfNotIgnored(
           controlRef.current[index],
-          getRandomInt(0, 10) > (1 - chance) * 10 ? scramble || seed : 0
+          getRandomInt(0, 10) >= (1 - chance) * 10 ? scramble || seed : 0
         );
       }
     }
@@ -191,11 +191,13 @@ export const useScramble = (props: UseScrambleProps) => {
       if (scrambleIndexRef.current < text.length) {
         const currentIndex = scrambleIndexRef.current;
 
-        const shouldScramble = getRandomInt(0, 10) > (1 - chance) * 10;
+        const shouldScramble = getRandomInt(0, 10) >= (1 - chance) * 10;
 
         controlRef.current[currentIndex] = setIfNotIgnored(
           text[scrambleIndexRef.current],
-          shouldScramble ? scramble : 0
+          shouldScramble
+            ? scramble + getRandomInt(0, Math.ceil(scramble / 2))
+            : 0
         );
         scrambleIndexRef.current++;
       }
