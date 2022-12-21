@@ -1,6 +1,6 @@
 # useScramble
 
-A lightweight (<1KB), high performance, react-hook for text animations.
+A lightweight (1KB), high performance, react-hook for random text animations.
 
 The hook receives a set of parameteres that allows you to customize the pace, and style of the animation.
 
@@ -47,22 +47,23 @@ export const App = () => {
 
 ## Props
 
-| Property         | type            | default  | range | description                                                                                      |
-| ---------------- | --------------- | -------- | ----- | ------------------------------------------------------------------------------------------------ |
-| playOnMount      | boolean         | true     |       | Skip the animation on the first text input                                                       |
-| text             | string          | -        |       | Text value to scramble to                                                                        |
-| speed            | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation                 |
-| tick             | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                      |
-| step             | number          | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                                     |
-| scramble         | number          | 1        | 0-∞   | How many times to randomize each character. A value of 0 will emulate a typewriter effect.       |
-| seed             | number          | 1        | 0-∞   | Adds random characters ahead of the animation sequence                                           |
-| chance           | number          | 1        | 0-1   | Chance of scrambling a character, range from 0 to 1, 0 being no chance, and 1 being 100% chance. |
-| range            | number[]        | [65,125] |       | Unicode characters range to select random characters from                                        |
-| overdrive        | boolean, number | true     |       | Defaults to underscore (95) unicode character, or provide a custom unicode value                 |
-| overflow         | boolean         | true     |       | Set to false to always restart the animation from an empty string                                |
-| onAnimationStart | function        | -        |       | callback invoked when the animation starts playing                                               |
-| onAnimationFrame | function        | -        |       | callback invoked on every rerender                                                               |
-| onAnimationEnd   | function        | -        |       | callback invoked on when the animation ends                                                      |
+| Property         | type            | default  | range | description                                                                                                                |
+| ---------------- | --------------- | -------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
+| playOnMount      | boolean         | true     |       | Skip the animation on the first text input                                                                                 |
+| text             | string          | -        |       | Text value to scramble to                                                                                                  |
+| speed            | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation                                           |
+| tick             | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                                                |
+| step             | number          | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                                                               |
+| scramble         | number          | 1        | 0-∞   | How many times to randomize each character. A value of 0 will emulate a typewriter effect.                                 |
+| seed             | number          | 1        | 0-∞   | Adds random characters ahead of the animation sequence                                                                     |
+| chance           | number          | 1        | 0-1   | Chance of scrambling a character, range from 0 to 1, 0 being no chance, and 1 being 100% chance.                           |
+| range            | number[]        | [65,125] |       | Unicode characters range to select random characters from                                                                  |
+| overdrive        | boolean, number | true     |       | Defaults to underscore (95) unicode character, or provide a custom unicode value                                           |
+| overflow         | boolean         | true     |       | Set to false to always restart the animation from an empty string                                                          |
+| ignore           | string[]        | [" "]    |       | Ignore specific characters when animating a string. By default only spaces are ignored, to maintain the shape of the text. |
+| onAnimationStart | function        | -        |       | callback invoked when the animation starts playing                                                                         |
+| onAnimationFrame | function        | -        |       | callback invoked on every rerender                                                                                         |
+| onAnimationEnd   | function        | -        |       | callback invoked on when the animation ends                                                                                |
 
 ## Return Values
 

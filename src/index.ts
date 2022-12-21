@@ -64,6 +64,10 @@ export type UseScrambleProps = {
    * @default 1
    */
   scramble?: number;
+  /**
+   * Characters to avoid scrambling
+   */
+  ignore?: string[];
 
   /**
    * Unicode character range for scrambler.
@@ -120,6 +124,7 @@ export const useScramble = (props: UseScrambleProps) => {
     onAnimationStart,
     onAnimationFrame,
     onAnimationEnd,
+    ignore = [' '],
   } = props;
 
   const prefersReducedMotion = window.matchMedia(
@@ -128,8 +133,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
   if (prefersReducedMotion) {
     step = text.length;
-    scramble = 0;
-    seed = 0;
+    chance = 0;
     overdrive = false;
   }
 
@@ -155,6 +159,11 @@ export const useScramble = (props: UseScrambleProps) => {
   // overdrive control index
   const overdriveRef = useRef<number>(0);
 
+  const setIfNotIgnored = (
+    value: string | number | null | number,
+    replace: string | number | null
+  ) => (ignore.includes(`${value}`) ? value : replace);
+
   // pick random character ahead in the string, and add them to the randomizer
   const seedForward = () => {
     if (scrambleIndexRef.current === text.length) return;
@@ -168,12 +177,10 @@ export const useScramble = (props: UseScrambleProps) => {
         typeof controlRef.current[index] !== 'number' &&
         typeof controlRef.current[index] !== 'undefined'
       ) {
-        controlRef.current[index] =
-          controlRef.current[index] === ' '
-            ? ' '
-            : getRandomInt(0, 10) > (1 - chance) * 10
-            ? scramble || seed
-            : 0;
+        controlRef.current[index] = setIfNotIgnored(
+          controlRef.current[index],
+          getRandomInt(0, 10) > (1 - chance) * 10 ? scramble || seed : 0
+        );
       }
     }
   };
@@ -186,12 +193,10 @@ export const useScramble = (props: UseScrambleProps) => {
 
         const shouldScramble = getRandomInt(0, 10) > (1 - chance) * 10;
 
-        controlRef.current[currentIndex] =
-          text[scrambleIndexRef.current] === ' '
-            ? ' '
-            : shouldScramble
-            ? scramble
-            : 0;
+        controlRef.current[currentIndex] = setIfNotIgnored(
+          text[scrambleIndexRef.current],
+          shouldScramble ? scramble : 0
+        );
         scrambleIndexRef.current++;
       }
     }
@@ -205,7 +210,7 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < step; i++) {
       if (controlRef.current.length < text.length) {
         controlRef.current.push(
-          text[controlRef.current.length + 1] === ' ' ? ' ' : null
+          setIfNotIgnored(text[controlRef.current.length + 1], null)
         );
       }
     }
@@ -217,12 +222,10 @@ export const useScramble = (props: UseScrambleProps) => {
     for (var i = 0; i < step; i++) {
       const max = Math.max(controlRef.current.length, text.length);
       if (overdriveRef.current < max) {
-        controlRef.current[overdriveRef.current] =
-          text[overdriveRef.current] === ' '
-            ? ' '
-            : String.fromCharCode(
-                typeof overdrive === 'boolean' ? 95 : overdrive
-              );
+        controlRef.current[overdriveRef.current] = setIfNotIgnored(
+          text[overdriveRef.current],
+          String.fromCharCode(typeof overdrive === 'boolean' ? 95 : overdrive)
+        );
         overdriveRef.current++;
       }
     }
@@ -313,9 +316,7 @@ export const useScramble = (props: UseScrambleProps) => {
     // set text
     nodeRef.current.innerHTML = result;
 
-    if (onAnimationFrame) {
-      onAnimationFrame(result);
-    }
+    onAnimationFrame && onAnimationFrame(result);
 
     /**
      * Exit if the result is equal to the input
@@ -325,9 +326,8 @@ export const useScramble = (props: UseScrambleProps) => {
      */
     if (result === text) {
       controlRef.current.splice(text.length, controlRef.current.length);
-      if (onAnimationEnd) {
-        onAnimationEnd();
-      }
+      onAnimationEnd && onAnimationEnd();
+
       cancelAnimationFrame(rafRef.current);
     }
 
@@ -356,9 +356,7 @@ export const useScramble = (props: UseScrambleProps) => {
   const play = () => {
     cancelAnimationFrame(rafRef.current);
     reset();
-    if (onAnimationStart) {
-      onAnimationStart();
-    }
+    onAnimationStart && onAnimationStart();
     rafRef.current = requestAnimationFrame(animate);
   };
 
@@ -374,6 +372,9 @@ export const useScramble = (props: UseScrambleProps) => {
     } else {
       reset();
     }
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+    };
   }, [text, overdrive, overflow]);
 
   /**
@@ -388,7 +389,7 @@ export const useScramble = (props: UseScrambleProps) => {
     return () => {
       cancelAnimationFrame(rafRef.current);
     };
-  }, [text, speed, animate]);
+  }, [animate]);
 
   return { ref: nodeRef, replay: play };
 };
