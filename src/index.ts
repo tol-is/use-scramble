@@ -127,9 +127,10 @@ export const useScramble = (props: UseScrambleProps) => {
     ignore = [' '],
   } = props;
 
-  const prefersReducedMotion = window.matchMedia(
-    '(prefers-reduced-motion: reduce)'
-  ).matches;
+  const prefersReducedMotion =
+    typeof window !== "undefined"
+      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      : false;
 
   if (prefersReducedMotion) {
     step = text.length;
