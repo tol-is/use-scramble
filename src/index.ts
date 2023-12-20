@@ -367,18 +367,8 @@ export const useScramble = (props: UseScrambleProps) => {
    * reset scramble when text input is changed
    */
   useEffect(() => {
-    if (!controlRef.current.length && !playOnMount) {
-      stepRef.current = text.length;
-      scrambleIndexRef.current = text.length;
-      overdriveRef.current = text.length;
-      controlRef.current = text.split('');
-    } else {
-      reset();
-    }
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-    };
-  }, [text, overdrive, overflow]);
+    reset();
+  }, [text]);
 
   /**
    * start or stop animation when text and speed change
@@ -393,6 +383,17 @@ export const useScramble = (props: UseScrambleProps) => {
       cancelAnimationFrame(rafRef.current);
     };
   }, [animate]);
+
+  useEffect(() => {
+    if (!playOnMount) {
+      controlRef.current = text.split('');
+      stepRef.current = text.length;
+      scrambleIndexRef.current = text.length;
+      overdriveRef.current = text.length;
+      draw();
+      cancelAnimationFrame(rafRef.current);
+    }
+  }, []);
 
   return { ref: nodeRef, replay: play };
 };
