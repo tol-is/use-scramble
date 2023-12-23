@@ -45,25 +45,44 @@ export const App = () => {
 };
 ```
 
-## Props
+## Manual replay
 
-| Property         | type            | default  | range | description                                                                                                                |
-| ---------------- | --------------- | -------- | ----- | -------------------------------------------------------------------------------------------------------------------------- |
-| playOnMount      | boolean         | true     |       | Skip the animation on the first text input                                                                                 |
-| text             | string          | -        |       | Text value to scramble to                                                                                                  |
-| speed            | number          | 1        | 0-1   | Animation framerate. 1 will redraw 60 times a second. 0 will pause the animation                                           |
-| tick             | number          | 1        | 1-∞   | Frames per tick, combined with `speed`, you can fully control the pace rate                                                |
-| step             | number          | 1        | 1-∞   | Moves the animation `step` characters forward, on every tick                                                               |
-| scramble         | number          | 1        | 0-∞   | How many times to randomize each character. A value of 0 will emulate a typewriter effect.                                 |
-| seed             | number          | 1        | 0-∞   | Adds random characters ahead of the animation sequence                                                                     |
-| chance           | number          | 1        | 0-1   | Chance of scrambling a character, range from 0 to 1, 0 being no chance, and 1 being 100% chance.                           |
-| range            | number[]        | [65,125] |       | Unicode characters range to select random characters from                                                                  |
-| overdrive        | boolean, number | true     |       | Defaults to underscore (95) unicode character, or provide a custom unicode value                                           |
-| overflow         | boolean         | true     |       | Set to false to always restart the animation from an empty string                                                          |
-| ignore           | string[]        | [" "]    |       | Ignore specific characters when animating a string. By default only spaces are ignored, to maintain the shape of the text. |
-| onAnimationStart | function        | -        |       | callback invoked when the animation starts playing                                                                         |
-| onAnimationFrame | function        | -        |       | callback invoked on every rerender                                                                                         |
-| onAnimationEnd   | function        | -        |       | callback invoked on when the animation ends                                                                                |
+Along with the `ref`, the hook returns a `replay` function, that you can call to start the animation manually.
+
+You can also disable the first animation, by setting the `playOnMount` to false.
+
+```jsx
+import { useScramble } from 'use-scramble';
+
+export const App = () => {
+  const { ref, replay } = useScramble({
+    text: 'Achilles next, that nimble runner, swift on his feet as the wind',
+    playOnMount: false
+  });
+
+  return <p ref={ref} onMouseOver={replay} onMouseOut={replay} />;
+};
+```
+
+## API Reference
+
+| Property         | type            | default  | range | description                                                                                                                          |
+| ---------------- | --------------- | -------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| playOnMount      | boolean         | true     |       | Skip the animation on the first mount input                                                                                          |
+| text             | string          | -        |       | Set the text value of the animation. The animation, will start automatically.                                                        |
+| speed            | number          | 1        | 0-1   | Internal clock framerate. 1 will tick 60 times a second. 0 will pause the animation                                                  |
+| tick             | number          | 1        | 1-∞   | Controls how many ticks pass for an animation redraw. Combined with `speed`, you can fully control the pace rate                     |
+| step             | number          | 1        | 1-∞   | Controls the animation step. On every redraw, the algorithm moves forward, by `step` characters.                                     |
+| scramble         | number          | 1        | 0-∞   | Controls how many times to randomize each character. A value of 0 will emulate a typewriter effect.                                  |
+| seed             | number          | 1        | 0-∞   | The `seed`, adds randomized characters ahead of the animation step, animating characters across the text block.                      |
+| chance           | number          | 1        | 0-1   | Chance of scrambling a character, range from 0 to 1, 0 being no chance, and 1 being 100% chance.                                     |
+| range            | number[]        | [65,125] |       | Unicode characters range to select random characters from                                                                            |
+| overdrive        | boolean, number | true     |       | Defaults to underscore (95) unicode character, or provide a custom unicode value                                                     |
+| overflow         | boolean         | true     |       | Overflow, animates over the previous text, and when false resets the text contents, and restarts the animation from an empty string. |
+| ignore           | string[]        | [" "]    |       | Ignore specific characters when animating a string. By default only spaces are ignored, used to maintain the shape of the text.      |
+| onAnimationStart | function        | -        |       | callback invoked when the animation starts playing                                                                                   |
+| onAnimationFrame | function        | -        |       | callback invoked on every redraw                                                                                                     |
+| onAnimationEnd   | function        | -        |       | callback invoked on when the animation ends                                                                                          |
 
 ## Return Values
 
@@ -78,8 +97,6 @@ return <p ref={ref} onclick={replay} />;
 ## Reduced Motion
 
 If the user has requested to minimize non-essential motion with `prefers-reduced-motion:reduce`, the animation is entirely disabled.
-
-Alternative recipes to tone down the animation are possible and currently considered. It's difficult to determine at what degree motion is essential.
 
 ## Unicode Values
 
