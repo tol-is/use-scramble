@@ -12,7 +12,7 @@ function getRandomChar(range: RangeOrCharCodes) {
     rand = range[getRandomInt(0, range.length - 1)];
   }
 
-  return String.fromCharCode(rand);
+  return String.fromCodePoint(rand);
 }
 
 type RangeOrCharCodes = {
