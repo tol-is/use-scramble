@@ -105,7 +105,9 @@ export type UseScrambleProps = {
   onAnimationFrame?: (result: string) => void;
 };
 
-export const useScramble = (props: UseScrambleProps) => {
+export const useScramble = <T extends HTMLElement = HTMLElement>(
+  props: UseScrambleProps
+) => {
   let {
     playOnMount = true,
     text = '',
@@ -143,7 +145,7 @@ export const useScramble = (props: UseScrambleProps) => {
     overdrive = false;
   }
 
-  const nodeRef = useRef<HTMLElement>(null);
+  const nodeRef = useRef<T>(null);
   const rafRef = useRef<number>(0);
   const elapsedRef = useRef(0);
   const stepRef = useRef<number>(0);
