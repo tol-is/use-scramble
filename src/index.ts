@@ -90,6 +90,14 @@ export type UseScrambleProps = {
   overflow?: boolean;
 
   /**
+   * Delay in milliseconds before the animation starts.
+   * Applies to both initial mount and replay.
+   *
+   * @default 0
+   */
+  delay?: number;
+
+  /**
    * Callback when animation starts drawing
    */
   onAnimationStart?: () => void;
@@ -118,6 +126,7 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     scramble = 1,
     chance = 1,
     overflow = true,
+    delay = 0,
     range = [65, 125],
     overdrive = true,
     onAnimationStart,
@@ -152,6 +161,7 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
   const scrambleIndexRef = useRef<number>(0);
   const controlRef = useRef<Array<string | number | null>>([]);
   const overdriveRef = useRef<number>(0);
+  const delayTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const mountedRef = useRef(false);
 
   const setIfNotIgnored = (
@@ -317,11 +327,20 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     }
   };
 
-  const play = () => {
-    cancelAnimationFrame(rafRef.current);
-    reset();
+  const startAnimation = () => {
     onAnimationStart && onAnimationStart();
     rafRef.current = requestAnimationFrame((t) => frameRef.current(t));
+  };
+
+  const play = () => {
+    cancelAnimationFrame(rafRef.current);
+    clearTimeout(delayTimerRef.current);
+    reset();
+    if (delay > 0) {
+      delayTimerRef.current = setTimeout(startAnimation, delay);
+    } else {
+      startAnimation();
+    }
   };
 
   useEffect(() => {
@@ -340,12 +359,21 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     }
 
     cancelAnimationFrame(rafRef.current);
+    clearTimeout(delayTimerRef.current);
     reset();
     elapsedRef.current = 0;
-    rafRef.current = requestAnimationFrame((t) => frameRef.current(t));
+
+    if (delay > 0) {
+      delayTimerRef.current = setTimeout(() => {
+        rafRef.current = requestAnimationFrame((t) => frameRef.current(t));
+      }, delay);
+    } else {
+      rafRef.current = requestAnimationFrame((t) => frameRef.current(t));
+    }
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      clearTimeout(delayTimerRef.current);
     };
   }, [text]);
 
