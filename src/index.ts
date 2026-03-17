@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function getRandomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -124,10 +124,18 @@ export const useScramble = (props: UseScrambleProps) => {
     ignore = [' '],
   } = props;
 
-  const prefersReducedMotion =
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
     typeof window !== "undefined"
       ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false;
+      : false
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   if (prefersReducedMotion) {
     step = text.length;
@@ -258,7 +266,7 @@ export const useScramble = (props: UseScrambleProps) => {
       }
     }
 
-    nodeRef.current.innerHTML = result;
+    nodeRef.current.textContent = result;
 
     onAnimationFrame && onAnimationFrame(result);
 
@@ -323,7 +331,7 @@ export const useScramble = (props: UseScrambleProps) => {
         scrambleIndexRef.current = text.length;
         overdriveRef.current = text.length;
         if (nodeRef.current) {
-          nodeRef.current.innerHTML = text;
+          nodeRef.current.textContent = text;
         }
         return;
       }
