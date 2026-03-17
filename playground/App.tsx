@@ -3,7 +3,7 @@ import { useControls, button } from 'leva';
 
 import tragedy from 'iphigenia-in-aulis';
 
-import { useScramble } from '../dist';
+import { useScramble } from '../src';
 
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
