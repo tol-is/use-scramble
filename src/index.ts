@@ -98,6 +98,17 @@ export type UseScrambleProps = {
   delay?: number;
 
   /**
+   * Direction in which characters are resolved during the animation.
+   *
+   * - `ltr`: left to right (default)
+   * - `rtl`: right to left
+   * - `random`: characters resolve in random order
+   *
+   * @default 'ltr'
+   */
+  direction?: 'ltr' | 'rtl' | 'random';
+
+  /**
    * Callback when animation starts drawing
    */
   onAnimationStart?: () => void;
@@ -127,6 +138,7 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     chance = 1,
     overflow = true,
     delay = 0,
+    direction = 'ltr',
     range = [65, 125],
     overdrive = true,
     onAnimationStart,
@@ -163,6 +175,21 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
   const overdriveRef = useRef<number>(0);
   const delayTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const mountedRef = useRef(false);
+  const resolveOrderRef = useRef<number[]>([]);
+  const enteredRef = useRef<boolean[]>([]);
+
+  const buildResolveOrder = () => {
+    const indices = Array.from({ length: text.length }, (_, i) => i);
+    if (direction === 'rtl') {
+      indices.reverse();
+    } else if (direction === 'random') {
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = getRandomInt(0, i);
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+    }
+    return indices;
+  };
 
   const setIfNotIgnored = (
     value: string | number | null,
@@ -173,10 +200,13 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     if (scrambleIndexRef.current === text.length) return;
 
     for (let i = 0; i < seed; i++) {
-      const index = getRandomInt(
-        scrambleIndexRef.current,
-        controlRef.current.length
-      );
+      const unresolvedStart = scrambleIndexRef.current;
+      const unresolvedEnd = resolveOrderRef.current.length;
+      if (unresolvedStart >= unresolvedEnd) return;
+
+      const orderIdx = getRandomInt(unresolvedStart, unresolvedEnd - 1);
+      const index = resolveOrderRef.current[orderIdx];
+
       if (
         typeof controlRef.current[index] !== 'number' &&
         typeof controlRef.current[index] !== 'undefined'
@@ -192,16 +222,17 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
   const stepForward = () => {
     for (let i = 0; i < step; i++) {
       if (scrambleIndexRef.current < text.length) {
-        const currentIndex = scrambleIndexRef.current;
+        const currentIndex = resolveOrderRef.current[scrambleIndexRef.current];
 
         const shouldScramble = getRandomInt(0, 10) >= (1 - chance) * 10;
 
         controlRef.current[currentIndex] = setIfNotIgnored(
-          text[scrambleIndexRef.current],
+          text[currentIndex],
           shouldScramble
             ? scramble + getRandomInt(0, Math.ceil(scramble / 2))
             : 0
         );
+        enteredRef.current[currentIndex] = true;
         scrambleIndexRef.current++;
       }
     }
@@ -227,8 +258,11 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     for (let i = 0; i < step; i++) {
       const max = Math.max(controlRef.current.length, text.length);
       if (overdriveRef.current < max) {
-        controlRef.current[overdriveRef.current] = setIfNotIgnored(
-          text[overdriveRef.current],
+        const index = overdriveRef.current < resolveOrderRef.current.length
+          ? resolveOrderRef.current[overdriveRef.current]
+          : overdriveRef.current;
+        controlRef.current[index] = setIfNotIgnored(
+          text[index],
           String.fromCharCode(typeof overdrive === 'boolean' ? 95 : overdrive)
         );
         overdriveRef.current++;
@@ -254,17 +288,17 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
         case typeof controlValue === 'number' && controlValue > 0:
           result += getRandomChar(range);
 
-          if (i <= scrambleIndexRef.current) {
+          if (enteredRef.current[i]) {
             controlRef.current[i] = (controlRef.current[i] as number) - 1;
           }
           break;
 
         case typeof controlValue === 'string' &&
-          (i >= text.length || i >= scrambleIndexRef.current):
+          (i >= text.length || !enteredRef.current[i]):
           result += controlValue;
           break;
 
-        case controlValue === text[i] && i < scrambleIndexRef.current:
+        case controlValue === text[i] && !!enteredRef.current[i]:
           result += text[i];
           break;
 
@@ -322,6 +356,8 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     stepRef.current = 0;
     scrambleIndexRef.current = 0;
     overdriveRef.current = 0;
+    resolveOrderRef.current = buildResolveOrder();
+    enteredRef.current = new Array(text.length).fill(false);
     if (!overflow) {
       controlRef.current = new Array(text?.length);
     }
@@ -347,6 +383,8 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     if (!mountedRef.current) {
       mountedRef.current = true;
       if (!playOnMount) {
+        resolveOrderRef.current = buildResolveOrder();
+        enteredRef.current = new Array(text.length).fill(true);
         controlRef.current = text.split('');
         stepRef.current = text.length;
         scrambleIndexRef.current = text.length;
