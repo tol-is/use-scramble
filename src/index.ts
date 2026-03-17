@@ -15,10 +15,7 @@ function getRandomChar(range: RangeOrCharCodes) {
   return String.fromCharCode(rand);
 }
 
-type RangeOrCharCodes = {
-  0: number;
-  1: number;
-} & Array<number>;
+type RangeOrCharCodes = [number, number] | number[];
 
 export type UseScrambleProps = {
   /**
@@ -95,12 +92,12 @@ export type UseScrambleProps = {
   /**
    * Callback when animation starts drawing
    */
-  onAnimationStart?: Function;
+  onAnimationStart?: () => void;
 
   /**
    * Callback for when the animation finished
    */
-  onAnimationEnd?: Function;
+  onAnimationEnd?: () => void;
 
   /**
    * onRedraw callback
@@ -138,7 +135,7 @@ export const useScramble = (props: UseScrambleProps) => {
     overdrive = false;
   }
 
-  const nodeRef = useRef<any>(null);
+  const nodeRef = useRef<HTMLElement>(null);
   const rafRef = useRef<number>(0);
   const elapsedRef = useRef(0);
   const stepRef = useRef<number>(0);
@@ -148,14 +145,14 @@ export const useScramble = (props: UseScrambleProps) => {
   const mountedRef = useRef(false);
 
   const setIfNotIgnored = (
-    value: string | number | null | number,
+    value: string | number | null,
     replace: string | number | null
   ) => (ignore.includes(`${value}`) ? value : replace);
 
   const seedForward = () => {
     if (scrambleIndexRef.current === text.length) return;
 
-    for (var i = 0; i < seed; i++) {
+    for (let i = 0; i < seed; i++) {
       const index = getRandomInt(
         scrambleIndexRef.current,
         controlRef.current.length
@@ -173,7 +170,7 @@ export const useScramble = (props: UseScrambleProps) => {
   };
 
   const stepForward = () => {
-    for (var i = 0; i < step; i++) {
+    for (let i = 0; i < step; i++) {
       if (scrambleIndexRef.current < text.length) {
         const currentIndex = scrambleIndexRef.current;
 
@@ -195,7 +192,7 @@ export const useScramble = (props: UseScrambleProps) => {
       controlRef.current.pop();
       controlRef.current.splice(text.length, step);
     }
-    for (var i = 0; i < step; i++) {
+    for (let i = 0; i < step; i++) {
       if (controlRef.current.length < text.length) {
         controlRef.current.push(
           setIfNotIgnored(text[controlRef.current.length + 1], null)
@@ -207,7 +204,7 @@ export const useScramble = (props: UseScrambleProps) => {
   const onOverdrive = () => {
     if (!overdrive) return;
 
-    for (var i = 0; i < step; i++) {
+    for (let i = 0; i < step; i++) {
       const max = Math.max(controlRef.current.length, text.length);
       if (overdriveRef.current < max) {
         controlRef.current[overdriveRef.current] = setIfNotIgnored(
@@ -230,7 +227,7 @@ export const useScramble = (props: UseScrambleProps) => {
 
     let result = '';
 
-    for (var i = 0; i < controlRef.current.length; i++) {
+    for (let i = 0; i < controlRef.current.length; i++) {
       const controlValue = controlRef.current[i];
 
       switch (true) {
