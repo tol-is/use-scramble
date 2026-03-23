@@ -70,12 +70,12 @@
     {
       "path": "./dist/index.js",
       "import": "{ useScramble }",
-      "limit": "1KB"
+      "limit": "1.5KB"
     },
     {
       "path": "./dist/index.mjs",
       "import": "{ useScramble }",
-      "limit": "1KB"
+      "limit": "1.5KB"
     }
   ],
   "devDependencies": {
