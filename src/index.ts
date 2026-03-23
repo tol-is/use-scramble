@@ -12,7 +12,7 @@ function getRandomChar(range: RangeOrCharCodes) {
     rand = range[getRandomInt(0, range.length - 1)];
   }
 
-  return String.fromCharCode(rand);
+  return String.fromCodePoint(rand);
 }
 
 type RangeOrCharCodes = [number, number] | number[];
@@ -148,16 +148,17 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
   } = props;
 
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(() =>
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    typeof window !== 'undefined'
+      ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false
   );
 
   useEffect(() => {
-    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onChange = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
-    mql.addEventListener("change", onChange);
-    return () => mql.removeEventListener("change", onChange);
+    const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onChange = (e: MediaQueryListEvent) =>
+      setPrefersReducedMotion(e.matches);
+    mql.addEventListener('change', onChange);
+    return () => mql.removeEventListener('change', onChange);
   }, []);
 
   if (prefersReducedMotion) {
@@ -258,12 +259,13 @@ export const useScramble = <T extends HTMLElement = HTMLElement>(
     for (let i = 0; i < step; i++) {
       const max = Math.max(controlRef.current.length, text.length);
       if (overdriveRef.current < max) {
-        const index = overdriveRef.current < resolveOrderRef.current.length
-          ? resolveOrderRef.current[overdriveRef.current]
-          : overdriveRef.current;
+        const index =
+          overdriveRef.current < resolveOrderRef.current.length
+            ? resolveOrderRef.current[overdriveRef.current]
+            : overdriveRef.current;
         controlRef.current[index] = setIfNotIgnored(
           text[index],
-          String.fromCharCode(typeof overdrive === 'boolean' ? 95 : overdrive)
+          String.fromCodePoint(typeof overdrive === 'boolean' ? 95 : overdrive)
         );
         overdriveRef.current++;
       }
