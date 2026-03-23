@@ -16,11 +16,24 @@
     "randomizer",
     "yugop"
   ],
-  "version": "2.2.15",
+  "version": "3.0.0",
   "license": "MIT",
-  "module": "dist/use-scramble.esm.js",
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    }
+  },
+  "sideEffects": false,
   "files": [
     "dist"
   ],
@@ -28,22 +41,23 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=10"
+    "node": ">=18"
   },
   "scripts": {
     "dev": "concurrently \"yarn start\" \"yarn playground\"",
     "playground": "parcel playground/index.html",
-    "start": "tsdx watch",
-    "build": "tsdx build",
-    "test": "tsdx test --passWithNoTests",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "start": "tsup --watch",
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepare": "tsup",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "tsc --noEmit"
     }
   },
   "prettier": {
@@ -54,34 +68,40 @@
   },
   "size-limit": [
     {
-      "path": "./dist/use-scramble.cjs.production.min.js",
+      "path": "./dist/index.js",
       "import": "{ useScramble }",
-      "limit": "1KB"
+      "limit": "1.5KB"
     },
     {
-      "path": "./dist/use-scramble.esm.js",
+      "path": "./dist/index.mjs",
       "import": "{ useScramble }",
-      "limit": "1KB"
+      "limit": "1.5KB"
     }
   ],
   "devDependencies": {
-    "@size-limit/preset-small-lib": "^4.8.0",
-    "@types/react": "^18.0.26",
-    "@types/react-dom": "^18.0.9",
-    "concurrently": "^7.6.0",
+    "@size-limit/preset-small-lib": "^11",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "concurrently": "^9.2.1",
     "husky": "^8.0.2",
     "iphigenia-in-aulis": "^1.0.0",
+    "jsdom": "^24",
     "leva": "^0.9.34",
     "parcel": "^2.8.0",
+    "process": "^0.11.10",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "size-limit": "^4.8.0",
-    "tsdx": "^0.14.1",
+    "size-limit": "^11",
     "tslib": "^2.4.1",
-    "typescript": "^4.9.3"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2"
   },
   "peerDependencies": {
-    "react": ">=16",
-    "react-dom": ">=16"
+    "react": ">=17",
+    "react-dom": ">=17"
   }
 }
